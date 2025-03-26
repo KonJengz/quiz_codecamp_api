@@ -1,0 +1,24 @@
+# Base or Builder image
+FROM node:20-alpine as builder
+
+WORKDIR /app
+# Copy dependency definitions
+COPY package*.json ./
+# Install project dependencies
+RUN npm install --legacy-peer-deps 
+COPY tsconfig*.json ./
+
+COPY . . 
+RUN npm run build      
+
+
+FROM node:20-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+COPY tsconfig*.json ./
+COPY --from=builder /app/dist ./dist
+EXPOSE ${APP_PORT}
+
+CMD ["npm", "run", "start"]

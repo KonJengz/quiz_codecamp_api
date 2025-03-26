@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  # database
+  database:
+    image: mongo:8.0.5
+    restart: always
+    container_name: mongodb
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongouser
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
+
+  # App services
+  app:
+    container_name: ${APP_NAME:-quiz_code_camp}
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    env_file:
+      - env.example.dev
+    ports:
+      - ${APP_PORT:-8080}:${APP_PORT:-8080}
+    depends_on:
+      - database
