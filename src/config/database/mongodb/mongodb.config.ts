@@ -20,7 +20,7 @@ export default registerAs<MongoDBConfigType>(AllConfigEnum.MongoDB, () => {
 
   return {
     url: process.env.DATABASE_URL,
-    dbName: process.env.DATABASE_URL,
+    dbName: process.env.DATABASE_NAME,
     username: process.env.DATABASE_USERNAME,
     password: process.env.DATABASE_PASSWORD,
   };
