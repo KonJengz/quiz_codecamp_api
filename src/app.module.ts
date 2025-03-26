@@ -5,11 +5,10 @@ import appConfig from './config/app.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { throttlerOptions } from './config/throttler/throttler.options';
 import clientConfig from './config/client.config';
-import mongodbConfig from './config/database/mongodb/mongodb.config';
 import {
   infraStructureDatabaseConfig,
   infraStructureDatabaseModule,
-} from './infrastructure/config/infrastructure.config';
+} from './infrastructure/persistence/config/infrastructure.config';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
