@@ -1,10 +1,14 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { HTTPMethod } from 'src/common/types/http.type';
 
 type CoreApiResponseConstructInput<T> = Omit<CoreApiResponse<T>, 'timeStamps'>;
 
 export class CoreApiResponse<T> {
+  @ApiProperty({ type: String })
   public message: string;
+  @ApiProperty({ type: String })
   public data: T;
+  @ApiProperty({ type: String })
   public timeStamps: string;
   constructor(input: CoreApiResponseConstructInput<T>) {
     const { data, message } = input;

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MongooseModuleOptions,
@@ -13,6 +13,7 @@ export class MongooseConfigService implements MongooseOptionsFactory {
   private dbName: string;
   private user: string;
   private pass: string;
+  private readonly logger: Logger = new Logger(MongooseConfigService.name);
 
   constructor(
     @Inject(ConfigService) private configService: ConfigService<AllConfigType>,
@@ -44,16 +45,19 @@ export class MongooseConfigService implements MongooseOptionsFactory {
     );
   }
 
-  createMongooseOptions():
-    | Promise<MongooseModuleOptions>
-    | MongooseModuleOptions {
+  createMongooseOptions(): MongooseModuleOptions {
+    this.logger.log(`Connecting to URL: ${this.uri}`);
+    this.logger.log(`Database Name: ${this.dbName}`);
     return {
       uri: this.uri,
-      dbName: this.dbName,
       auth: {
         username: this.user,
         password: this.pass,
       },
+      dbName: this.dbName,
+      authSource: 'admin',
+      retryWrites: true,
+      w: 'majority',
     };
   }
 }

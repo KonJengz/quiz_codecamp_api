@@ -16,7 +16,7 @@ import { CategoriesModule } from './resources/categories/categories.module';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
-Logger.log('Loading env file from:', envPath);
+console.log('Loading env file from:', envPath);
 
 @Module({
   imports: [
