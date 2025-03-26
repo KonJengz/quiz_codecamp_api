@@ -9,6 +9,10 @@ import {
   infraStructureDatabaseConfig,
   infraStructureDatabaseModule,
 } from './infrastructure/persistence/config/infrastructure.config';
+import { QuestionsModule } from './resources/questions/questions.module';
+import { SubmitModule } from './resources/submit/submit.module';
+import { UsersModule } from './resources/users/users.module';
+import { CategoriesModule } from './resources/categories/categories.module';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -25,6 +29,10 @@ Logger.log('Loading env file from:', envPath);
       load: [appConfig, clientConfig, infraStructureDatabaseConfig],
     }),
     infraStructureDatabaseModule,
+    QuestionsModule,
+    SubmitModule,
+    UsersModule,
+    CategoriesModule,
   ],
 })
 export class AppModule {}
