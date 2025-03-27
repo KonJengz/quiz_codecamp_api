@@ -4,8 +4,8 @@ import { Service } from 'src/common/base-class';
 import { Category } from './domain/categories.domain';
 import { CreateCategoryDto } from './dto/create.dto';
 import { ErrorApiResponse } from 'src/core/error-response';
-import { Promisable } from 'src/common/types/types';
-import { isString, isUUID } from 'class-validator';
+import { isString } from 'class-validator';
+import { UpdateCategoryDto } from './dto/update.dto';
 
 @Injectable()
 export class CategoriesService extends Service<Category> {
@@ -13,8 +13,10 @@ export class CategoriesService extends Service<Category> {
     super();
   }
 
-  create(data: CreateCategoryDto): Promise<Category> {
-    const isTheNameExist = this.categoriesRepository.findByName(data.name);
+  async create(data: CreateCategoryDto): Promise<Category> {
+    const isTheNameExist = await this.categoriesRepository.findByName(
+      data.name,
+    );
 
     if (isTheNameExist)
       throw ErrorApiResponse.conflictRequest(
@@ -33,5 +35,14 @@ export class CategoriesService extends Service<Category> {
     return this.categoriesRepository.findMany();
   }
 
-  update(data: Partial<Omit<Category, 'id'>>, id: string): Category {}
+  async update(data: UpdateCategoryDto): Promise<Category> {
+    const { categoryId, ...rest } = data;
+
+    const isCategoryExist =
+      await this.categoriesRepository.findById(categoryId);
+
+    if (!isCategoryExist) throw ErrorApiResponse.notFound('ID', categoryId);
+
+    return this.categoriesRepository.update(rest, categoryId);
+  }
 }

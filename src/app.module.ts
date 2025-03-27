@@ -13,6 +13,7 @@ import { QuestionsModule } from './resources/questions/questions.module';
 import { SubmitModule } from './resources/submit/submit.module';
 import { UsersModule } from './resources/users/users.module';
 import { CategoriesModule } from './resources/categories/categories.module';
+import { HealthcheckController } from './healthcheck/healthcheck.controller';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -34,5 +35,6 @@ console.log('Loading env file from:', envPath);
     UsersModule,
     CategoriesModule,
   ],
+  controllers: [HealthcheckController],
 })
 export class AppModule {}
