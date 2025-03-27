@@ -19,18 +19,26 @@ export class ErrorApiResponse {
     );
   }
 
-  public static badRequest(message?: string) {
-    const responseMessage =
-      message ??
-      'Bad Request due to malsyntax request body or invalid request.';
+  public static badRequest(message?: 'ID' | string, id?: string) {
+    let responseMessage: string;
+
+    switch (message) {
+      case 'ID':
+        let idMsg = id ? `: ${id}` : ' provided';
+        responseMessage = `The ID${idMsg} is not  a valid type for `;
+        break;
+      default:
+        responseMessage =
+          'Bad Request due to malsyntax request body or invalid request.';
+    }
     return new HttpException(
       new ErrorApiResponse(responseMessage),
       HttpStatus.BAD_REQUEST,
     );
   }
 
-  public static conflictRequest(message?: string) {
-    const respMsg =
+  public static conflictRequest(message?: 'ID' | string) {
+    let respMsg =
       message ??
       'The request has a logical conflict. Please re-send it with resolved conflict.';
     return new HttpException(

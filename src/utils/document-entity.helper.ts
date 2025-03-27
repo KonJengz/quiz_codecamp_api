@@ -1,6 +1,7 @@
 import { Transform } from 'class-transformer';
+import { Document } from 'mongoose';
 
-export class EntityDocumentHelper {
+export class EntityDocumentHelper extends Document {
   @Transform(
     (value) => {
       if ('value' in value) {
@@ -10,5 +11,5 @@ export class EntityDocumentHelper {
     },
     { toPlainOnly: true },
   )
-  public _id: string;
+  _id: string;
 }
