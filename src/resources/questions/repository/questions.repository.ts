@@ -11,38 +11,26 @@ export class QuestionDocumentRepository implements QuestionRepository {
     @InjectModel(QuestionSchemaClass.name)
     private readonly questionModel: Model<QuestionSchemaClass>,
   ) {}
-  create<U extends Partial<Question>>(data: U): Question {
-    return new Question({
-      description: '',
-      id: '',
-      solution: '',
-      starterCode: '',
-    });
+  private mockQuestion = new Question({
+    id: '',
+    description: '',
+    solution: '',
+    starterCode: '',
+  });
+
+  create<U extends Partial<Question>>(data: U): Promise<Question> {
+    return Promise.resolve(this.mockQuestion);
   }
-  findById(id: string): Question {
-    return new Question({
-      description: '',
-      id: '',
-      solution: '',
-      starterCode: '',
-    });
+  findById(id: string): Promise<Question> {
+    return Promise.resolve(this.mockQuestion);
   }
-  findMany(): Question[] {
-    return [
-      new Question({
-        description: '',
-        id: '',
-        solution: '',
-        starterCode: '',
-      }),
-    ];
+  findMany(): Promise<Question[]> {
+    return Promise.resolve([this.mockQuestion]);
   }
-  update<U extends Partial<Omit<Question, 'id'>>>(data: U): Question {
-    return new Question({
-      description: '',
-      id: '',
-      solution: '',
-      starterCode: '',
-    });
+  update<U extends Partial<Omit<Question, 'id'>>>(
+    data: U,
+    id: string,
+  ): Promise<Question> {
+    return Promise.resolve(this.mockQuestion);
   }
 }

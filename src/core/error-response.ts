@@ -9,9 +9,18 @@ export class ErrorApiResponse {
     this.timeStamps = Date.now().toLocaleString();
   }
 
-  public static notFound(message?: string) {
-    const respMsg =
-      message ?? 'The requested resource can not be found on this server.';
+  public static notFound(message?: 'ID' | string, id?: string) {
+    let respMsg: string;
+
+    switch (message) {
+      case 'ID':
+        let idMsg = id ? `: ${id}` : ' provided';
+        respMsg = `The ID${idMsg} could not be found on this server.`;
+        break;
+      default:
+        respMsg = 'The requested resource could not be found on this server.';
+        break;
+    }
 
     return new HttpException(
       new ErrorApiResponse(respMsg),
@@ -25,11 +34,12 @@ export class ErrorApiResponse {
     switch (message) {
       case 'ID':
         let idMsg = id ? `: ${id}` : ' provided';
-        responseMessage = `The ID${idMsg} is not  a valid type for `;
+        responseMessage = `The ID${idMsg} is not  a valid type for the ID resources.`;
         break;
       default:
         responseMessage =
           'Bad Request due to malsyntax request body or invalid request.';
+        break;
     }
     return new HttpException(
       new ErrorApiResponse(responseMessage),

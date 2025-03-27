@@ -18,21 +18,21 @@ export class CoreApiResponse<T> {
   }
 
   public static getSuccess<T>(path: string, data: T): CoreApiResponse<T> {
-    const message = `${HTTPMethod.GET} ${path} successfully`;
+    const message = `${HTTPMethod.GET} /${path} successfully`;
     return new CoreApiResponse<T>({ message, data });
   }
 
   public static postSuccess<T>(path: string, data: T): CoreApiResponse<T> {
-    const message = `${HTTPMethod.POST} ${path} successfully`;
+    const message = `${HTTPMethod.POST} /${path} successfully`;
     return new CoreApiResponse<T>({ message, data });
   }
 
   public static patchSuccess<T>(path: string, data: T): CoreApiResponse<T> {
-    const message = `${HTTPMethod.PATCH} ${path} successfully`;
+    const message = `${HTTPMethod.PATCH} /${path} successfully`;
     return new CoreApiResponse<T>({ message, data });
   }
   public static deleteSuccess(path: string): CoreApiResponse<null> {
-    const message = `${HTTPMethod.PATCH} ${path} successfully`;
+    const message = `${HTTPMethod.PATCH} /${path} successfully`;
     return new CoreApiResponse<null>({ message, data: null });
   }
 }

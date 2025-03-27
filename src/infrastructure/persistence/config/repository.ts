@@ -7,5 +7,8 @@ export abstract class Repository<T extends { id: string }> {
 
   abstract findMany(): Promise<Array<T>>;
 
-  abstract update<U extends Partial<Omit<T, 'id'>>>(data: U): Promise<T>;
+  abstract update<U extends Partial<Omit<T, 'id'>>>(
+    data: U,
+    id: T['id'],
+  ): Promise<T>;
 }

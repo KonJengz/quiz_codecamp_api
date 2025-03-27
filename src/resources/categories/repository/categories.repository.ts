@@ -4,7 +4,6 @@ import { CategoriesRepository } from './categories-abstract.repository';
 import { CategorySchemaClass } from './entities/category.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import { CategoriesController } from '../categories.controller';
 import { CategoryMapper } from './mapper/category.mapper';
 
 @Injectable()
@@ -39,7 +38,16 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     return categoryObj.map(CategoryMapper.toDomain);
   }
 
-  update<U extends Partial<Omit<Category, 'id'>>>(data: U): Category {
-    return new Category({ id: '', name: '', isChallenge: false });
+  async update<U extends Partial<Omit<Category, 'id'>>>(
+    data: U,
+    id: Category['id'],
+  ): Promise<Category> {
+    const categoryObj = await this.categoryModel.findOneAndUpdate(
+      { _id: id },
+      data,
+      { new: true },
+    );
+
+    return CategoryMapper.toDomain(categoryObj);
   }
 }
