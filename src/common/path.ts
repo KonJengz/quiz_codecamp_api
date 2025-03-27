@@ -1,8 +1,14 @@
+const AUTH_PATH = 'auth';
 const USER_PATH = 'users';
 const CATEGORIES_PATH = 'categories';
 const QUESTIONS_PATH = 'questions';
 const SUBMIT_PATH = 'submit';
 const HEALTH_PATH = 'healthcheck';
+
+export const authPath = {
+  base: AUTH_PATH,
+  login: '/login',
+};
 
 export const healthCheckPath = {
   base: HEALTH_PATH,

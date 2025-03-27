@@ -6,26 +6,7 @@ export class ErrorApiResponse {
 
   constructor(message: string) {
     this.message = message;
-    this.timeStamps = Date.now().toLocaleString();
-  }
-
-  public static notFound(message?: 'ID' | string, id?: string) {
-    let respMsg: string;
-
-    switch (message) {
-      case 'ID':
-        let idMsg = id ? `: ${id}` : ' provided';
-        respMsg = `The ID${idMsg} could not be found on this server.`;
-        break;
-      default:
-        respMsg = 'The requested resource could not be found on this server.';
-        break;
-    }
-
-    return new HttpException(
-      new ErrorApiResponse(respMsg),
-      HttpStatus.NOT_FOUND,
-    );
+    this.timeStamps = new Date(Date.now()).toLocaleString();
   }
 
   public static badRequest(message?: 'ID' | string, id?: string) {
@@ -44,6 +25,34 @@ export class ErrorApiResponse {
     return new HttpException(
       new ErrorApiResponse(responseMessage),
       HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  public static unauthorized(message?: string): HttpException {
+    let responseMessage: string = message ?? 'This request is unauthorized.';
+
+    return new HttpException(
+      new ErrorApiResponse(responseMessage),
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  public static notFound(message?: 'ID' | string, id?: string) {
+    let respMsg: string;
+
+    switch (message) {
+      case 'ID':
+        let idMsg = id ? `: ${id}` : ' provided';
+        respMsg = `The ID${idMsg} could not be found on this server.`;
+        break;
+      default:
+        respMsg = 'The requested resource could not be found on this server.';
+        break;
+    }
+
+    return new HttpException(
+      new ErrorApiResponse(respMsg),
+      HttpStatus.NOT_FOUND,
     );
   }
 

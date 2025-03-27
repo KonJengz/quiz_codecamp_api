@@ -14,7 +14,7 @@ export class CoreApiResponse<T> {
     const { data, message } = input;
     this.data = data;
     this.message = message;
-    this.timeStamps = Date.now().toLocaleString();
+    this.timeStamps = new Date(Date.now()).toLocaleString();
   }
 
   public static getSuccess<T>(path: string, data: T): CoreApiResponse<T> {
