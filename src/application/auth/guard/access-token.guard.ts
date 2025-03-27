@@ -1,0 +1,54 @@
+import { CanActivate, ExecutionContext, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
+import { JwtPayloadType } from 'src/common/types/payload.type';
+import { AllConfigEnum } from 'src/config/types/all-config.type';
+import { AuthConfig } from 'src/config/types/auth-config.type';
+import { ErrorApiResponse } from 'src/core/error-response';
+import { RoleEnum, User } from 'src/resources/users/domain/user.domain';
+
+export class AccessTokenAuthGuard implements CanActivate {
+  private logger: Logger = new Logger(AccessTokenAuthGuard.name);
+
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request: Request = context.switchToHttp().getRequest();
+    const token = this.extractJWTFromHeaders(request);
+
+    if (!token) throw ErrorApiResponse.unauthorized();
+    try {
+      const payload: JwtPayloadType = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.getOrThrow<AuthConfig>(
+          `${AllConfigEnum.Auth}.accessTokenSecret`,
+          { infer: true },
+        ),
+      });
+
+      const { accountId } = request.params;
+
+      if (accountId && accountId !== payload.sub) {
+        if (payload.role !== RoleEnum.Admin)
+          throw ErrorApiResponse.unauthorized();
+      }
+
+      request['user'] = { accountId: payload.sub, role: payload.role };
+    } catch (err) {
+      this.logger.error(
+        `Request could not be proceed due to the Error : ${err.message}`,
+      );
+      throw ErrorApiResponse.unauthorized(err.message);
+    }
+
+    return true;
+  }
+
+  private extractJWTFromHeaders(req: Request): string {
+    const [type, token] = req.headers?.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
+}

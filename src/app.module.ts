@@ -14,6 +14,11 @@ import { SubmitModule } from './resources/submit/submit.module';
 import { UsersModule } from './resources/users/users.module';
 import { CategoriesModule } from './resources/categories/categories.module';
 import { HealthcheckController } from './healthcheck/healthcheck.controller';
+import { CustomValidatorModule } from './utils/validators/custom-validator.module';
+import { AuthController } from './application/auth/auth.controller';
+import { AuthService } from './application/auth/auth.service';
+import { AuthModule } from './application/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -29,12 +34,16 @@ console.log('Loading env file from:', envPath);
       envFilePath: `${process.cwd()}/.env.${env}`,
       load: [appConfig, clientConfig, infraStructureDatabaseConfig],
     }),
+    JwtModule.register({ global: true }),
     infraStructureDatabaseModule,
     QuestionsModule,
     SubmitModule,
     UsersModule,
     CategoriesModule,
+    CustomValidatorModule,
+    AuthModule,
   ],
-  controllers: [HealthcheckController],
+  controllers: [HealthcheckController, AuthController],
+  providers: [AuthService],
 })
 export class AppModule {}

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { categoriesPath } from 'src/common/path';
 import { CategoriesService } from './categories.service';
 import { Category } from './domain/categories.domain';
@@ -17,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateCategoryDto, UpdateCategoryResponse } from './dto/update.dto';
 import { openApiDocs } from 'src/docs/open-api.docs';
+import { AccessTokenAuthGuard } from 'src/application/auth/guard/access-token.guard';
 
 @Controller({ version: '1', path: categoriesPath.base })
 export class CategoriesController {
@@ -48,6 +57,7 @@ export class CategoriesController {
   @ApiBearerAuth()
   @ApiBody({ type: CreateCategoryDto })
   @ApiCreatedResponse({ type: CreateCategoryResponse })
+  @UseGuards(AccessTokenAuthGuard)
   @Post()
   async create(
     @Body() body: CreateCategoryDto,
@@ -68,6 +78,7 @@ export class CategoriesController {
     description: openApiDocs.updateUrlParameter.isNotRequire,
   })
   @ApiOkResponse({ type: UpdateCategoryResponse })
+  @UseGuards(AccessTokenAuthGuard)
   @Patch(`:${categoriesPath.paramId}`)
   async update(
     @Body() body: UpdateCategoryDto,
