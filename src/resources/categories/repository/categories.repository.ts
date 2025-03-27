@@ -4,6 +4,8 @@ import { CategoriesRepository } from './categories-abstract.repository';
 import { CategorySchemaClass } from './entities/category.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
+import { CategoriesController } from '../categories.controller';
+import { CategoryMapper } from './mapper/category.mapper';
 
 @Injectable()
 export class CategoriesDocumentRepository implements CategoriesRepository {
@@ -12,15 +14,31 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     private readonly categoryModel: Model<CategorySchemaClass>,
   ) {}
 
-  create<U extends Partial<Category>>(data: U): Category {
-    return new Category({ id: '', name: '', isChallenge: false });
+  async create<U extends Partial<Category>>(data: U): Promise<Category> {
+    const createdCategory = new this.categoryModel(data);
+    const categoryObj = await createdCategory.save();
+
+    return CategoryMapper.toDomain(categoryObj);
   }
-  findById(id: string): Category {
-    return new Category({ id: '', name: '', isChallenge: false });
+
+  async findById(id: Category['id']): Promise<Category> {
+    const categoryObj = await this.categoryModel.findById(id);
+    return CategoryMapper.toDomain(categoryObj);
   }
-  findMany(): Category[] {
-    return [new Category({ id: '', name: '', isChallenge: false })];
+
+  async findByName(name: Category['name']): Promise<Category> {
+    const categoryObj = await this.categoryModel.findOne({
+      name,
+    });
+
+    return CategoryMapper.toDomain(categoryObj);
   }
+
+  async findMany(): Promise<Category[]> {
+    const categoryObj = await this.categoryModel.find();
+    return categoryObj.map(CategoryMapper.toDomain);
+  }
+
   update<U extends Partial<Omit<Category, 'id'>>>(data: U): Category {
     return new Category({ id: '', name: '', isChallenge: false });
   }

@@ -13,14 +13,18 @@ export type CategorySchemaDocument = HydratedDocument<CategorySchemaClass>;
 })
 export class CategorySchemaClass extends EntityDocumentHelper {
   @Prop({
+    required: true,
     type: String,
+    unique: true,
   })
   name: string;
 
   @Prop({
+    required: true,
     type: Boolean,
+    default: false,
   })
-  isChallenged: boolean;
+  isChallenge: boolean;
 
   @Prop({
     default: now,
@@ -32,8 +36,10 @@ export class CategorySchemaClass extends EntityDocumentHelper {
   })
   updatedAt: Date;
 
-  @Prop()
-  deletedAt: Date;
+  @Prop({
+    required: false,
+  })
+  deletedAt?: Date;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(CategorySchemaClass);
