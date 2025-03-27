@@ -33,7 +33,7 @@ export class User extends BaseDomain {
     username: User['username'];
     createdAt: User['createdAt'];
     updatedAt: User['updatedAt'];
-    deletedAt: User['deletedAt'];
+    deletedAt?: User['deletedAt'];
     password?: User['password'];
   }) {
     super({ createdAt, id, updatedAt, deletedAt });

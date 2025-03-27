@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, now } from 'mongoose';
+import mongoose, { HydratedDocument, now } from 'mongoose';
+import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 export type CategorySchemaDocument = HydratedDocument<CategorySchemaClass>;
@@ -25,6 +26,13 @@ export class CategorySchemaClass extends EntityDocumentHelper {
     default: false,
   })
   isChallenge: boolean;
+
+  @Prop({
+    type: Array<mongoose.Schema.Types.ObjectId>,
+    ref: 'QuestionSchemaClass',
+    default: [],
+  })
+  questions: QuestionSchemaClass['id'][];
 
   @Prop({
     default: now,
