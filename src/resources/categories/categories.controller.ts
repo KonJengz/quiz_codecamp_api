@@ -10,7 +10,6 @@ import {
 import { categoriesPath } from 'src/common/path';
 import { CategoriesService } from './categories.service';
 import { Category } from './domain/categories.domain';
-import { CoreApiResponse } from 'src/core/api-response';
 import {
   GetByIdCategoriesResponse,
   GetManyCategoriesResponse,

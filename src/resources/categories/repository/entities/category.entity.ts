@@ -28,8 +28,9 @@ export class CategorySchemaClass extends EntityDocumentHelper {
   isChallenge: boolean;
 
   @Prop({
-    type: Array<mongoose.Schema.Types.ObjectId>,
-    ref: 'QuestionSchemaClass',
+    type: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'QuestionSchemaClass' },
+    ],
     default: [],
   })
   questions: QuestionSchemaClass['id'][];
