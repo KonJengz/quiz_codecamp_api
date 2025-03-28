@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {  AuthLoginDto } from './dto/login.dto';
+import { AuthLoginDto } from './dto/login.dto';
 import { AllConfigEnum, AllConfigType } from 'src/config/types/all-config.type';
 import { AuthConfig } from 'src/config/types/auth-config.type';
 import { JwtPayloadType } from 'src/common/types/payload.type';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/resources/users/domain/user.domain';
 import { UsersService } from 'src/resources/users/users.service';
+import { ErrorApiResponse } from 'src/core/error-response';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,7 @@ export class AuthService {
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
     private readonly jwtService: JwtService,
-    private readonly userService: UsersService 
+    private readonly userService: UsersService,
   ) {
     this.accessTokenSecret = configService.getOrThrow<AuthConfig>(
       `${AllConfigEnum.Auth}.accessTokenSecret`,
@@ -28,8 +29,12 @@ export class AuthService {
   }
 
   async validateLogin(data: AuthLoginDto): Promise<User> {
-    const isUserExist = await this.;
+    const isUserExist = await this.userService.getByUsername(data.username);
 
+    if (isUserExist.password !== data.password)
+      throw ErrorApiResponse.unauthorized(`The login information is invalid.`);
+
+    return isUserExist;
   }
 
   async generateToken(payload: JwtPayloadType): Promise<string> {

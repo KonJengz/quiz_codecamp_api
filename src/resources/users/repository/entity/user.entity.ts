@@ -1,12 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  DefaultSchemaOptions,
-  Document,
-  FlatRecord,
-  HydratedDocument,
-  Model,
-  now,
-} from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 export type UserSchemaDocumennt = HydratedDocument<UserSchemaClass>;
@@ -32,16 +25,6 @@ export class UserSchemaClass extends EntityDocumentHelper {
     unique: true,
   })
   password: string;
-
-  @Prop({
-    default: now,
-  })
-  createdAt: Date;
-
-  @Prop({
-    default: now,
-  })
-  updatedAt: Date;
 
   @Prop({
     required: false,

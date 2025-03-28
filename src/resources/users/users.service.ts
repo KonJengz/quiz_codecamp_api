@@ -5,30 +5,33 @@ import { User } from './domain/user.domain';
 import { NullAble } from 'src/common/types/types';
 import { isString } from 'class-validator';
 import { ErrorApiResponse } from 'src/core/error-response';
+import { CreateUserDto } from './dto/create.dto';
 
 @Injectable()
 export class UsersService extends Service<User> {
-  private mockUser: User = new User({
-    id: '',
-    username: '',
-    password: '',
-    createdAt: '',
-    deletedAt: null,
-    updatedAt: '',
-  });
-
   constructor(private readonly userRepository: UserRepository) {
     super();
   }
 
-  create(data: unknown): Promise<User> {
-    return Promise.resolve(this.mockUser);
+  async create(data: CreateUserDto): Promise<User> {
+    const isUsernameExist = await this.getByUsername(data.username);
+
+    if (isUsernameExist)
+      throw ErrorApiResponse.conflictRequest(
+        `The username: ${data.username} is already existed`,
+      );
+
+    return this.userRepository.create(data);
   }
-  getById(id: string): Promise<User> {
-    return Promise.resolve(this.mockUser);
+  async getById(id: User['id']): Promise<User> {
+    const isUserExist = await this.userRepository.findById(id);
+
+    if (!isUserExist) throw ErrorApiResponse.notFound('ID', id);
+
+    return isUserExist;
   }
   getMany(): Promise<User[]> {
-    return Promise.resolve([this.mockUser]);
+    return this.userRepository.findMany();
   }
 
   public async getByUsername(
@@ -44,9 +47,23 @@ export class UsersService extends Service<User> {
       throw ErrorApiResponse.notFound(
         `Username: ${username} could not be found on this server.`,
       );
+
+    return isUserExist;
   }
 
-  update(data: Partial<Omit<User, 'id'>>, id: string): Promise<User> {
-    return Promise.resolve(this.mockUser);
+  async update(data: Partial<Omit<User, 'id'>>, id: string): Promise<User> {
+    const isUserExist = await this.getById(id);
+
+    if (!isUserExist) throw ErrorApiResponse.notFound('ID', id);
+
+    if (data.username) {
+      const isUsernameExist = await this.getByUsername(data.username);
+      if (isUsernameExist)
+        throw ErrorApiResponse.conflictRequest(
+          `The username ${data.username} is already existed.`,
+        );
+    }
+
+    return this.userRepository.update(data, id);
   }
 }

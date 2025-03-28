@@ -1,9 +1,38 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, now } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
+
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    getters: true,
+  },
+})
+export class TestCaseSchemaClass extends EntityDocumentHelper {
+  @Prop({
+    type: String,
+    required: true,
+  })
+  input: string;
+  @Prop({
+    type: String,
+    required: true,
+  })
+  code: string;
+  @Prop({
+    type: String,
+    required: true,
+  })
+  output: string;
+  @Prop({
+    required: false,
+  })
+  deletedAt?: Date;
+}
 
 @Schema({
   timestamps: true,
@@ -17,7 +46,7 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CategorySchemaClass',
   })
-  category: CategorySchemaClass;
+  categoryId: CategorySchemaClass;
 
   @Prop({
     type: String,
@@ -39,13 +68,14 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   })
   solution: string;
 
-  @Prop({ default: now })
-  createdAt: Date;
+  @Prop({
+    type: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'TestCaseSchemaClass' },
+    ],
+  })
+  testCases: TestCaseSchemaClass[];
 
-  @Prop({ default: now })
-  updatedAt: Date;
-
-  @Prop()
+  @Prop({ required: false })
   deletedAt: Date;
 }
 
