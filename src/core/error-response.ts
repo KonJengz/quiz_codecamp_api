@@ -2,11 +2,11 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class ErrorApiResponse {
   public message: string;
-  public timeStamps: string;
+  public timestamps: string;
 
   constructor(message: string) {
     this.message = message;
-    this.timeStamps = new Date(Date.now()).toLocaleString();
+    this.timestamps = new Date(Date.now()).toLocaleString();
   }
 
   public static badRequest(message?: 'ID' | string, id?: string) {

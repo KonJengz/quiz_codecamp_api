@@ -15,6 +15,6 @@ export class BaseDomain {
     this.id = id;
     this.createdAt = createdAt.toLocaleString();
     this.updatedAt = updatedAt.toLocaleString();
-    this.deletedAt = deletedAt ? deletedAt.toLocaleString() : null;
+    if (deletedAt) this.deletedAt = deletedAt.toLocaleString();
   }
 }
