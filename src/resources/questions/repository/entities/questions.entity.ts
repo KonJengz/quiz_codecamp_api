@@ -45,26 +45,31 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CategorySchemaClass',
+    required: true,
   })
   categoryId: CategorySchemaClass;
 
   @Prop({
     type: String,
+    required: true,
   })
   name: string;
 
   @Prop({
     type: String,
+    required: true,
   })
   description: string;
 
   @Prop({
     type: String,
+    required: true,
   })
   starterCode: string;
 
   @Prop({
     type: String,
+    required: true,
   })
   solution: string;
 
@@ -72,6 +77,7 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
     type: [
       { type: mongoose.Schema.Types.ObjectId, ref: 'TestCaseSchemaClass' },
     ],
+    default: [],
   })
   testCases: TestCaseSchemaClass[];
 

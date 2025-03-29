@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/app.config';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -10,7 +10,6 @@ import {
   infraStructureDatabaseModule,
 } from './infrastructure/persistence/config/infrastructure.config';
 import { QuestionsModule } from './resources/questions/questions.module';
-import { SubmitModule } from './resources/submit/submit.module';
 import { UsersModule } from './resources/users/users.module';
 import { CategoriesModule } from './resources/categories/categories.module';
 import { HealthcheckController } from './healthcheck/healthcheck.controller';
@@ -19,6 +18,7 @@ import { AuthController } from './application/auth/auth.controller';
 import { AuthService } from './application/auth/auth.service';
 import { AuthModule } from './application/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { SubmissionsModule } from './resources/submissions/submissions.module';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -37,7 +37,7 @@ console.log('Loading env file from:', envPath);
     JwtModule.register({ global: true }),
     infraStructureDatabaseModule,
     QuestionsModule,
-    SubmitModule,
+    SubmissionsModule,
     UsersModule,
     CategoriesModule,
     CustomValidatorModule,

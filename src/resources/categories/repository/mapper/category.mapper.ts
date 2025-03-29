@@ -6,15 +6,6 @@ export class CategoryMapper {
     // If there are no document entity provided, return null
     if (!documentEntity) return null;
 
-    const { id, name, isChallenge, createdAt, updatedAt, deletedAt } =
-      documentEntity;
-    return new Category({
-      id,
-      name,
-      isChallenge,
-      createdAt,
-      updatedAt,
-      deletedAt,
-    });
+    return new Category(documentEntity.toObject());
   }
 }

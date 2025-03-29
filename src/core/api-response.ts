@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { HTTPMethod } from 'src/common/types/http.type';
 
-type CoreApiResponseConstructInput<T> = Omit<CoreApiResponse<T>, 'timeStamps'>;
+type CoreApiResponseConstructInput<T> = Omit<CoreApiResponse<T>, 'timestamps'>;
 
 export class CoreApiResponse<T> {
   @ApiProperty({ type: String })
@@ -9,12 +9,12 @@ export class CoreApiResponse<T> {
   @ApiProperty({ type: String })
   public data: T;
   @ApiProperty({ type: String })
-  public timeStamps: string;
+  public timestamps: string;
   constructor(input: CoreApiResponseConstructInput<T>) {
     const { data, message } = input;
     this.data = data;
     this.message = message;
-    this.timeStamps = new Date(Date.now()).toLocaleString();
+    this.timestamps = new Date(Date.now()).toLocaleString();
   }
 
   public static getSuccess<T>(path: string, data: T): CoreApiResponse<T> {

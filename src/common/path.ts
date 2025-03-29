@@ -2,7 +2,7 @@ const AUTH_PATH = 'auth';
 const USER_PATH = 'users';
 const CATEGORIES_PATH = 'categories';
 const QUESTIONS_PATH = 'questions';
-const SUBMIT_PATH = 'submit';
+const SUBMISSIONS_PATH = 'submissions';
 const HEALTH_PATH = 'healthcheck';
 
 export const authPath = {
@@ -26,6 +26,6 @@ export const categoriesPath = {
 export const questionsPath = {
   base: QUESTIONS_PATH,
 };
-export const submitPath = {
-  base: SUBMIT_PATH,
+export const submissionsPath = {
+  base: SUBMISSIONS_PATH,
 };

@@ -1,3 +1,4 @@
+import { Prop } from '@nestjs/mongoose';
 import { Transform } from 'class-transformer';
 import { Document } from 'mongoose';
 
@@ -12,4 +13,13 @@ export class EntityDocumentHelper extends Document {
     { toPlainOnly: true },
   )
   _id: string;
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
+
+  @Prop({ type: Date, default: Date.now })
+  updatedAt: Date;
+
+  @Prop({ type: Date, required: false })
+  deletedAt?: Date;
 }

@@ -12,6 +12,7 @@
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "cross-env NODE_ENV=production node dist/main",
+    "seed:user": "ts-node -r tsconfig-paths/register ./src/utils/seeds/seeds.ts",
     "spawn:db": "docker-compose -f docker-compose.db.yaml up --build",
     "spawn:dev": "docker-compose -f docker-compose.dev.yaml up --build",
     "drop:dev": "docker-compose -f docker-compose.dev.yaml down",

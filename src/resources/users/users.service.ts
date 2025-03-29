@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { UserRepository } from './repository/user-abstract.repository';
 import { Service } from 'src/common/base-class';
 import { User } from './domain/user.domain';
@@ -6,11 +6,32 @@ import { NullAble } from 'src/common/types/types';
 import { isString } from 'class-validator';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { CreateUserDto } from './dto/create.dto';
+import { userSeedsData } from 'src/utils/seeds/data/user-data.seed';
 
 @Injectable()
-export class UsersService extends Service<User> {
+export class UsersService extends Service<User> implements OnModuleInit {
+  private readonly logger: Logger = new Logger(UsersService.name);
   constructor(private readonly userRepository: UserRepository) {
     super();
+  }
+
+  async onModuleInit() {
+    try {
+      const count = await this.userRepository.count();
+      if (count > 2) {
+        this.logger.log('Seeding skipped as there are users data in db.');
+        return;
+      }
+
+      if (count >= 1) {
+        await this.userRepository.deleteAll();
+      }
+
+      await this.userRepository.seeds(userSeedsData);
+    } catch (err) {
+      this.logger.error(err.message);
+      console.log('There is an error while seeding.');
+    }
   }
 
   async create(data: CreateUserDto): Promise<User> {

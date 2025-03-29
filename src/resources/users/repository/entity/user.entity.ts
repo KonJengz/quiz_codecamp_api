@@ -22,9 +22,20 @@ export class UserSchemaClass extends EntityDocumentHelper {
   @Prop({
     required: true,
     type: String,
-    unique: true,
   })
   password: string;
+
+  @Prop({
+    type: Number,
+    default: 0,
+  })
+  totalSolvedQuizzes?: number;
+
+  @Prop({
+    type: Number,
+    default: 0,
+  })
+  totalSolvedChallenges?: number;
 
   @Prop({
     required: false,
