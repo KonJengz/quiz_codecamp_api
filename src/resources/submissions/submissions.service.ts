@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Service } from 'src/common/base-class';
 import { Submission } from './domain/submission.domain';
 import { CreateSubmissionInput } from './dto/create.dto';
+import { CodeExecutorService } from 'src/infrastructure/executor/codeExecutor-abstract.service';
 
 @Injectable()
 export class SubmissionsService extends Service<Submission> {
@@ -13,6 +14,10 @@ export class SubmissionsService extends Service<Submission> {
     updatedAt: '',
     userId: '',
   });
+
+  constructor(private readonly codeExecutorService: CodeExecutorService) {
+    super();
+  }
 
   private executeCode() {}
 

@@ -14,7 +14,7 @@ services:
     networks:
       - app_network
     volumes:
-      - ./mongo_data:data/db
+      - ./mongo_data:/data/db
 
   mongo-express:
     image: mongo-express

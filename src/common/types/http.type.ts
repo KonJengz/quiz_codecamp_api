@@ -11,7 +11,7 @@ export enum HTTPMethod {
 
 export interface HttpRequestWithUser extends Request {
   user: {
-    accountId: User['id'];
+    userId: User['id'];
     role: RoleEnum;
   };
 }

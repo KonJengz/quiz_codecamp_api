@@ -22,7 +22,10 @@ export class SubmissionsController {
     @Body() body: CreateSubmissionDto,
     @Req() req: HttpRequestWithUser,
   ): Promise<CreateSubmissionResponse> {
-    const createdSubmission = await this.submissionsService.create(body);
+    const createdSubmission = await this.submissionsService.create({
+      ...body,
+      userId: req.user.userId,
+    });
 
     return CreateSubmissionResponse.postSuccess(
       submissionsPath.base,

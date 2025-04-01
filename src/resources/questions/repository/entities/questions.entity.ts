@@ -22,11 +22,6 @@ export class TestCaseSchemaClass extends EntityDocumentHelper {
     type: String,
     required: true,
   })
-  code: string;
-  @Prop({
-    type: String,
-    required: true,
-  })
   output: string;
   @Prop({
     required: false,
@@ -52,8 +47,9 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   @Prop({
     type: String,
     required: true,
+    unique: true,
   })
-  name: string;
+  title: string;
 
   @Prop({
     type: String,
@@ -72,6 +68,8 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
     required: true,
   })
   solution: string;
+
+  variableName: string;
 
   @Prop({
     type: [
