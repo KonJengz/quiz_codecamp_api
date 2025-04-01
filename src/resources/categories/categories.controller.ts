@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { categoriesPath } from 'src/common/path';
@@ -13,6 +14,8 @@ import { Category } from './domain/categories.domain';
 import {
   GetByIdCategoriesResponse,
   GetManyCategoriesResponse,
+  GetMyCategoriesResponse,
+  MyCategory,
 } from './dto/get.dto';
 import { CreateCategoryDto, CreateCategoryResponse } from './dto/create.dto';
 import {
@@ -26,6 +29,7 @@ import { UpdateCategoryDto, UpdateCategoryResponse } from './dto/update.dto';
 import { openApiDocs } from 'src/docs/open-api.docs';
 import { AccessTokenAuthGuard } from 'src/application/auth/guard/access-token.guard';
 import { AdminGuard } from 'src/application/auth/guard/admin.guard';
+import { HttpRequestWithUser } from 'src/common/types/http.type';
 
 @Controller({ version: '1', path: categoriesPath.base })
 export class CategoriesController {
@@ -52,6 +56,15 @@ export class CategoriesController {
       `${categoriesPath.base}/${id}`,
       category,
     );
+  }
+
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: GetMyCategoriesResponse })
+  @UseGuards(AccessTokenAuthGuard)
+  @Get(categoriesPath.me)
+  async getMe(@Req() req: HttpRequestWithUser): Promise<string> {
+    // return GetMyCategoriesResponse.getSuccess(categoriesPath.me, [new MyCategory()])
+    return '';
   }
 
   @ApiBearerAuth()

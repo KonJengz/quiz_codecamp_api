@@ -20,6 +20,7 @@ export const userPath = {
 
 export const categoriesPath = {
   base: CATEGORIES_PATH,
+  me: 'me',
   paramId: 'categoryId',
 };
 
