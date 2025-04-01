@@ -25,6 +25,7 @@ import {
 import { UpdateCategoryDto, UpdateCategoryResponse } from './dto/update.dto';
 import { openApiDocs } from 'src/docs/open-api.docs';
 import { AccessTokenAuthGuard } from 'src/application/auth/guard/access-token.guard';
+import { AdminGuard } from 'src/application/auth/guard/admin.guard';
 
 @Controller({ version: '1', path: categoriesPath.base })
 export class CategoriesController {
@@ -56,7 +57,7 @@ export class CategoriesController {
   @ApiBearerAuth()
   @ApiBody({ type: CreateCategoryDto })
   @ApiCreatedResponse({ type: CreateCategoryResponse })
-  @UseGuards(AccessTokenAuthGuard)
+  @UseGuards(AccessTokenAuthGuard, AdminGuard)
   @Post()
   async create(
     @Body() body: CreateCategoryDto,
@@ -77,7 +78,7 @@ export class CategoriesController {
     description: openApiDocs.updateUrlParameter.isNotRequire,
   })
   @ApiOkResponse({ type: UpdateCategoryResponse })
-  @UseGuards(AccessTokenAuthGuard)
+  @UseGuards(AccessTokenAuthGuard, AdminGuard)
   @Patch(`:${categoriesPath.paramId}`)
   async update(
     @Body() body: UpdateCategoryDto,

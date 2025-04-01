@@ -31,6 +31,7 @@ export class User extends BaseDomain {
     id,
     password,
     username,
+    role,
     createdAt,
     deletedAt,
     updatedAt,
@@ -45,9 +46,11 @@ export class User extends BaseDomain {
     password?: User['password'];
     totalSolvedChallenges?: User['totalSolvedChallenges'];
     totalSolvedQuizzes?: User['totalSolvedQuizzes'];
+    role: User['role'];
   }) {
     super({ createdAt, id, updatedAt, deletedAt });
     this.username = username;
+    this.role = role;
     if (password) this.password = password;
     if (isNumber(totalSolvedQuizzes))
       this.totalSolvedQuizzes = totalSolvedQuizzes;

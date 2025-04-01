@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
+import { RoleEnum } from '../../domain/user.domain';
 
 export type UserSchemaDocumennt = HydratedDocument<UserSchemaClass>;
 
@@ -36,6 +37,12 @@ export class UserSchemaClass extends EntityDocumentHelper {
     default: 0,
   })
   totalSolvedChallenges?: number;
+
+  @Prop({
+    enum: RoleEnum,
+    default: RoleEnum.Student,
+  })
+  role: RoleEnum;
 
   @Prop({
     required: false,

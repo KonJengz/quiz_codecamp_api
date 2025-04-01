@@ -22,5 +22,6 @@ import { QuestionDocumentRepository } from './questions.repository';
       useClass: QuestionDocumentRepository,
     },
   ],
+  exports: [QuestionRepository],
 })
 export class QuestionsRepositoryModule {}

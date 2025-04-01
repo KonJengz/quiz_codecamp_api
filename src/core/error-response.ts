@@ -37,13 +37,17 @@ export class ErrorApiResponse {
     );
   }
 
-  public static notFound(message?: 'ID' | string, id?: string) {
+  public static notFound(message?: 'ID' | string, id?: string, type?: string) {
     let respMsg: string;
 
     switch (message) {
       case 'ID':
         let idMsg = id ? `: ${id}` : ' provided';
-        respMsg = `The ID${idMsg} could not be found on this server.`;
+        if (type) {
+          respMsg = `The ${type} ID${idMsg} could not be found on this server.`;
+        } else {
+          respMsg = `The ID${idMsg} could not be found on this server.`;
+        }
         break;
       default:
         respMsg = 'The requested resource could not be found on this server.';

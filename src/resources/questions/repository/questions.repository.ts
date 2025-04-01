@@ -4,6 +4,7 @@ import { Question } from '../domain/question.domain';
 import { QuestionSchemaClass } from './entities/questions.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { NullAble } from 'src/common/types/types';
 
 @Injectable()
 export class QuestionDocumentRepository implements QuestionRepository {
@@ -13,6 +14,12 @@ export class QuestionDocumentRepository implements QuestionRepository {
   ) {}
   private mockQuestion = new Question({
     id: '',
+    category: { id: '', isChallenge: false, name: '' },
+    testCases: [],
+    title: '',
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: '',
     description: '',
     solution: '',
     starterCode: '',
@@ -26,6 +33,9 @@ export class QuestionDocumentRepository implements QuestionRepository {
   }
   findMany(): Promise<Question[]> {
     return Promise.resolve([this.mockQuestion]);
+  }
+  findByTitle(title: Question['title']): Promise<NullAble<Question>> {
+    return Promise.resolve(this.mockQuestion);
   }
   update<U extends Partial<Omit<Question, 'id'>>>(
     data: U,
