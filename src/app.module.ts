@@ -19,7 +19,10 @@ import { AuthService } from './application/auth/auth.service';
 import { AuthModule } from './application/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { SubmissionsModule } from './resources/submissions/submissions.module';
+<<<<<<< HEAD
 import { ExecutesModule } from './resources/executes/executes.module';
+=======
+>>>>>>> origin/main
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -43,7 +46,10 @@ console.log('Loading env file from:', envPath);
     CategoriesModule,
     CustomValidatorModule,
     AuthModule,
+<<<<<<< HEAD
     ExecutesModule,
+=======
+>>>>>>> origin/main
   ],
   controllers: [HealthcheckController, AuthController],
   providers: [AuthService],
