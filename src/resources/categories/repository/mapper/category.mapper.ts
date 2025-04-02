@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { Category, MyCategory } from '../../domain/categories.domain';
-=======
-import { Category } from '../../domain/categories.domain';
->>>>>>> origin/main
 import { CategorySchemaClass } from '../entities/category.entity';
 
 export class CategoryMapper {
@@ -12,13 +8,10 @@ export class CategoryMapper {
 
     return new Category(documentEntity.toObject());
   }
-<<<<<<< HEAD
 
   public static toMyCategoryDomain(
     documentEntity: CategorySchemaClass,
   ): MyCategory {
     return new MyCategory(documentEntity.toObject());
   }
-=======
->>>>>>> origin/main
 }

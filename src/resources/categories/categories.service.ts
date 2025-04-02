@@ -1,19 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CategoriesRepository } from './repository/categories-abstract.repository';
 import { Service } from 'src/common/base-class';
-<<<<<<< HEAD
 import { Category, MyCategory } from './domain/categories.domain';
-=======
-import { Category } from './domain/categories.domain';
->>>>>>> origin/main
 import { CreateCategoryDto } from './dto/create.dto';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { isString } from 'class-validator';
 import { UpdateCategoryDto } from './dto/update.dto';
-<<<<<<< HEAD
 import { User } from '../users/domain/user.domain';
-=======
->>>>>>> origin/main
 
 @Injectable()
 export class CategoriesService extends Service<Category> {
@@ -43,13 +36,10 @@ export class CategoriesService extends Service<Category> {
     return this.categoriesRepository.findMany();
   }
 
-<<<<<<< HEAD
   getMe(userId: User['id']): Promise<MyCategory[]> {
     return this.categoriesRepository.findMyCategories(userId);
   }
 
-=======
->>>>>>> origin/main
   async update(data: UpdateCategoryDto): Promise<Category> {
     const { categoryId, ...rest } = data;
 

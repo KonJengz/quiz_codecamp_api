@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { ITestCase } from './codeExecutor.service';
 
 export enum CodeExecutionEnum {
@@ -27,8 +26,4 @@ export abstract class CodeExecutorService {
     testCases?: ITestCase[],
     options?: CodeExecutionOptions,
   ): Promise<CodeExecutionResult>;
-=======
-export abstract class CodeExecutorService {
-  public abstract execute(): string;
->>>>>>> origin/main
 }

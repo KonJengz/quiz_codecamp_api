@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseDomain } from 'src/common/base-domain';
-<<<<<<< HEAD
 import { Question } from 'src/resources/questions/domain/question.domain';
-=======
->>>>>>> origin/main
 
 type CategoryInputConstructor = Category;
 
@@ -13,7 +10,6 @@ export class Category extends BaseDomain {
   @ApiProperty({ type: Boolean, example: 'false' })
   isChallenge: boolean;
 
-<<<<<<< HEAD
   @ApiProperty({ type: [String], example: [1, 2, 3] })
   questions: Question['id'][];
 
@@ -21,11 +17,6 @@ export class Category extends BaseDomain {
     id,
     name,
     questions,
-=======
-  constructor({
-    id,
-    name,
->>>>>>> origin/main
     isChallenge,
     createdAt,
     updatedAt,
@@ -34,7 +25,6 @@ export class Category extends BaseDomain {
     super({ id, createdAt, updatedAt, deletedAt });
     this.name = name;
     this.isChallenge = isChallenge;
-<<<<<<< HEAD
     this.questions = questions;
   }
 }
@@ -65,7 +55,5 @@ export class MyCategory extends Category {
     });
 
     this.solvedQuestions = solvedQuestions;
-=======
->>>>>>> origin/main
   }
 }

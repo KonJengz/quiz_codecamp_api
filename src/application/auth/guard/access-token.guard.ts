@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
   CanActivate,
   ExecutionContext,
@@ -6,9 +5,6 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-=======
-import { CanActivate, ExecutionContext, Inject, Logger } from '@nestjs/common';
->>>>>>> origin/main
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
@@ -17,14 +13,9 @@ import { AllConfigEnum } from 'src/config/types/all-config.type';
 import { AuthConfig } from 'src/config/types/auth-config.type';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { RoleEnum } from 'src/resources/users/domain/user.domain';
-<<<<<<< HEAD
-import { UsersService } from 'src/resources/users/users.service';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-=======
-
->>>>>>> origin/main
 export class AccessTokenAuthGuard implements CanActivate {
   private logger: Logger = new Logger(AccessTokenAuthGuard.name);
 
@@ -32,10 +23,7 @@ export class AccessTokenAuthGuard implements CanActivate {
     @Inject(JwtService)
     private jwtService: JwtService,
     private configService: ConfigService,
-<<<<<<< HEAD
     private authService: AuthService,
-=======
->>>>>>> origin/main
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -53,13 +41,10 @@ export class AccessTokenAuthGuard implements CanActivate {
 
       const { userId } = request.params;
 
-<<<<<<< HEAD
       const isUserExist = await this.authService.validateUser(payload.sub);
 
       if (!isUserExist) throw ErrorApiResponse.unauthorized('identifier');
 
-=======
->>>>>>> origin/main
       if (userId && userId !== payload.sub) {
         if (payload.role !== RoleEnum.Admin)
           throw ErrorApiResponse.unauthorized();

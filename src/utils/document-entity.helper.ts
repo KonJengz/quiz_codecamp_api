@@ -22,12 +22,9 @@ export class EntityDocumentHelper extends Document {
 
   @Prop({ type: Date, required: false })
   deletedAt?: Date;
-<<<<<<< HEAD
 
   softDelete(): void {
     this.deletedAt = new Date(Date.now());
     return;
   }
-=======
->>>>>>> origin/main
 }
