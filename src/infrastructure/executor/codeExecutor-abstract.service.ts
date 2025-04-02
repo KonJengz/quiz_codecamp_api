@@ -18,7 +18,7 @@ export type TestedCodeResults = {
   total: number;
 };
 
-export type CodeSubmitResult = {
+export type SubmittedCodeResult = {
   status: CodeExecutionEnum;
   isError: boolean;
   errMsg: string;
@@ -51,5 +51,5 @@ export abstract class CodeExecutorService {
     testCases: ITestCase[],
     isFunction: boolean,
     options?: CodeExecutionOptions,
-  ): Promise<CodeSubmitResult>;
+  ): Promise<SubmittedCodeResult>;
 }

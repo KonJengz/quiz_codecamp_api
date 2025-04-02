@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
@@ -16,10 +16,10 @@ export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
 })
 export class TestCaseSchemaClass extends EntityDocumentHelper {
   @Prop({
-    type: String,
+    type: [String],
     required: true,
   })
-  input: string;
+  input: string[];
   @Prop({
     type: String,
     required: true,

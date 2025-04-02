@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Service } from 'src/common/base-class';
 import { Submission } from './domain/submission.domain';
 import { CreateSubmissionInput } from './dto/create.dto';
-import { CodeExecutorService } from 'src/infrastructure/executor/codeExecutor-abstract.service';
+import {
+  CodeExecutorService,
+  SubmittedCodeResult,
+} from 'src/infrastructure/executor/codeExecutor-abstract.service';
 import {
   ITestCase,
   TestCaseMatcherEnum,
@@ -26,11 +29,13 @@ export class SubmissionsService extends Service<Submission> {
   private executeCode() {}
 
   override async create(data: CreateSubmissionInput): Promise<Submission> {
-    const resultObj = await this.testCode(data);
+    const resultObj = await this.testCode(data.code);
     return Promise.resolve(this.mockSubmission);
   }
 
-  private async testCode(data: CreateSubmissionInput) {
+  private async testCode(
+    userCode: CreateSubmissionInput['code'],
+  ): Promise<SubmittedCodeResult> {
     const testCases: ITestCase[] = [
       {
         matcher: TestCaseMatcherEnum.toBe,
@@ -49,11 +54,12 @@ export class SubmissionsService extends Service<Submission> {
       },
     ];
     const result = await this.codeExecutorService.submit(
-      data.code,
+      userCode,
       testCases,
       true,
     );
     console.log(result);
+    return result;
   }
 
   getById(id: string): Promise<Submission> {

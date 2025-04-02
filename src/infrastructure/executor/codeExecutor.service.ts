@@ -4,7 +4,7 @@ import {
   CodeExecutionOptions,
   CodeExecutionResult,
   CodeExecutorService,
-  CodeSubmitResult,
+  SubmittedCodeResult,
   TestedCodeResults,
 } from './codeExecutor-abstract.service';
 import * as ivm from 'isolated-vm';
@@ -122,7 +122,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
     testCases: ITestCase[],
     isFunction: boolean,
     options?: CodeExecutionOptions,
-  ): Promise<CodeSubmitResult> {
+  ): Promise<SubmittedCodeResult> {
     let isolate: ivm.Isolate;
     let results: TestedCodeResults;
     let status: CodeExecutionEnum;
