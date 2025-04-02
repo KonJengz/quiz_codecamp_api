@@ -12,18 +12,44 @@ export type CodeExecutionOptions = {
   maxExecutionCount?: number;
 };
 
-export type CodeExecutionResult = {
+export type TestedCodeResults = {
+  passed: number;
+  failed: TestResultType['detail'][];
+  total: number;
+};
+
+export type CodeSubmitResult = {
   status: CodeExecutionEnum;
-  error: string;
+  isError: boolean;
+  errMsg: string;
   logs: string[];
-  testResults?: any[];
+  results: TestedCodeResults;
+};
+
+export type CodeExecutionResult = {
+  isError: boolean;
+  errMsg: string;
+  logs: string[];
+};
+
+export type TestResultType = {
+  passed: boolean;
+  detail: {
+    actual: unknown;
+    expected: unknown;
+    testCase: number;
+    error?: string;
+  };
+  error: string;
 };
 
 export abstract class CodeExecutorService {
-  public abstract execute(
+  public abstract execute(code: string): Promise<CodeExecutionResult>;
+
+  public abstract submit(
     code: string,
+    testCases: ITestCase[],
     isFunction: boolean,
-    testCases?: ITestCase[],
     options?: CodeExecutionOptions,
-  ): Promise<CodeExecutionResult>;
+  ): Promise<CodeSubmitResult>;
 }

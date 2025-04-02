@@ -49,7 +49,8 @@ export class QuestionsService implements Service<Question> {
   // PRIVATE METHOD PART
 
   private validateQuestionCode(data: CreateQuestionDto): void {
-    const { starterCode, solution, variableName } = data;
+    const { starterCode, solution, variableName, testCase } = data;
+
     return;
   }
 }

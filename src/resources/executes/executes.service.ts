@@ -6,6 +6,6 @@ export class ExecutesService {
   constructor(private readonly codeExecutorService: CodeExecutorService) {}
 
   execute(code: string) {
-    return this.codeExecutorService.execute(code, false);
+    return this.codeExecutorService.execute(code);
   }
 }

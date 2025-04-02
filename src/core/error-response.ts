@@ -40,7 +40,7 @@ export class ErrorApiResponse {
 
     return new HttpException(
       new ErrorApiResponse(responseMessage),
-      HttpStatus.BAD_REQUEST,
+      HttpStatus.UNAUTHORIZED,
     );
   }
 

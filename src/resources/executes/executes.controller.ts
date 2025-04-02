@@ -11,7 +11,6 @@ export class ExecutesController {
   @ApiBody({ type: ExecuteDto })
   @Post()
   execute(@Body() body: ExecuteDto) {
-    console.log(body);
     return this.executesService.execute(body.code);
   }
 }
