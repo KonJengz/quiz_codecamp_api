@@ -1,7 +1,9 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
-import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
+import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
+
+export const SUBMISSIONS_JOIN_CONST = 'submissions';
 
 export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
 
@@ -35,6 +37,9 @@ export class TestCaseSchemaClass extends EntityDocumentHelper {
     virtuals: true,
     getters: true,
   },
+  toObject: {
+    virtuals: true,
+  },
 })
 export class QuestionSchemaClass extends EntityDocumentHelper {
   @Prop({
@@ -42,7 +47,7 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
     ref: 'CategorySchemaClass',
     required: true,
   })
-  categoryId: CategorySchemaClass;
+  categoryId: Types.ObjectId;
 
   @Prop({
     type: String,
@@ -69,6 +74,10 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   })
   solution: string;
 
+  @Prop({
+    type: String,
+    required: true,
+  })
   variableName: string;
 
   @Prop({
@@ -77,10 +86,13 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
     ],
     default: [],
   })
-  testCases: TestCaseSchemaClass[];
-
-  @Prop({ required: false })
-  deletedAt: Date;
+  testCases: Types.ObjectId[];
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(QuestionSchemaClass);
+
+QuestionSchema.virtual(SUBMISSIONS_JOIN_CONST, {
+  ref: SubmissionSchemaClass.name,
+  localField: '_id',
+  foreignField: 'questionId',
+});

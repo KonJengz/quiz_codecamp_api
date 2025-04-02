@@ -8,20 +8,6 @@ import { ErrorApiResponse } from 'src/core/error-response';
 
 @Injectable()
 export class QuestionsService implements Service<Question> {
-  private mockQuestion = new Question({
-    id: '',
-    category: { id: '', isChallenge: false, name: '' },
-    createdAt: '',
-    description: '',
-    title: '',
-    solution: '',
-    starterCode: '',
-    testCases: [],
-    updatedAt: '',
-    deletedAt: '',
-  });
-
-  private mockResolve = Promise.resolve(this.mockQuestion);
   constructor(
     private readonly questionRepository: QuestionRepository,
     private readonly categoriesService: CategoriesService,
@@ -36,22 +22,34 @@ export class QuestionsService implements Service<Question> {
       throw ErrorApiResponse.notFound('ID', data.categoryId, 'Category');
 
     const isQuestionDuped = await this.questionRepository.findByTitle(
-      data.name,
+      data.title,
     );
 
     if (isQuestionDuped)
       throw ErrorApiResponse.conflictRequest(
         `The question name: ${isQuestionDuped.title} is already exist. Please try again with new question name.`,
       );
-    return this.mockResolve;
+
+    // Validate the question
+    this.validateQuestionCode(data);
+
+    return this.questionRepository.create(data);
   }
-  getById(id: string): Promise<Question> {
-    return this.mockResolve;
+
+  getById(id: Question['id']): Promise<Question> {
+    return this.questionRepository.findById(id);
   }
   getMany(): Promise<Question[]> {
-    return Promise.resolve([this.mockQuestion]);
+    return this.questionRepository.findMany();
   }
   update(data: Partial<Omit<Question, 'id'>>, id: string): Promise<Question> {
-    return this.mockResolve;
+    return this.questionRepository.update(data, id);
+  }
+
+  // PRIVATE METHOD PART
+
+  private validateQuestionCode(data: CreateQuestionDto): void {
+    const { starterCode, solution, variableName } = data;
+    return;
   }
 }

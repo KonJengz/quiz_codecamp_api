@@ -1,8 +1,6 @@
 import { CoreApiResponse } from 'src/core/api-response';
-import { Category } from '../domain/categories.domain';
+import { Category, MyCategory } from '../domain/categories.domain';
 import { ApiProperty } from '@nestjs/swagger';
-
-export class MyCategory extends Category {}
 
 export class GetManyCategoriesResponse extends CoreApiResponse<
   Array<Category>

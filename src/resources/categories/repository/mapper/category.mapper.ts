@@ -1,4 +1,4 @@
-import { Category } from '../../domain/categories.domain';
+import { Category, MyCategory } from '../../domain/categories.domain';
 import { CategorySchemaClass } from '../entities/category.entity';
 
 export class CategoryMapper {
@@ -7,5 +7,11 @@ export class CategoryMapper {
     if (!documentEntity) return null;
 
     return new Category(documentEntity.toObject());
+  }
+
+  public static toMyCategoryDomain(
+    documentEntity: CategorySchemaClass,
+  ): MyCategory {
+    return new MyCategory(documentEntity.toObject());
   }
 }

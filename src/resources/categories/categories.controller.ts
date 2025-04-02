@@ -15,7 +15,6 @@ import {
   GetByIdCategoriesResponse,
   GetManyCategoriesResponse,
   GetMyCategoriesResponse,
-  MyCategory,
 } from './dto/get.dto';
 import { CreateCategoryDto, CreateCategoryResponse } from './dto/create.dto';
 import {
@@ -45,6 +44,17 @@ export class CategoriesController {
     );
   }
 
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: GetMyCategoriesResponse })
+  @UseGuards(AccessTokenAuthGuard)
+  @Get(categoriesPath.me)
+  async getMe(
+    @Req() req: HttpRequestWithUser,
+  ): Promise<GetMyCategoriesResponse> {
+    const myCategories = await this.categoriesService.getMe(req.user.userId);
+    return GetMyCategoriesResponse.getSuccess(categoriesPath.me, myCategories);
+  }
+
   @ApiParam({ name: categoriesPath.paramId, required: true })
   @ApiOkResponse({ type: GetByIdCategoriesResponse })
   @Get(`:${categoriesPath.paramId}`)
@@ -56,15 +66,6 @@ export class CategoriesController {
       `${categoriesPath.base}/${id}`,
       category,
     );
-  }
-
-  @ApiBearerAuth()
-  @ApiOkResponse({ type: GetMyCategoriesResponse })
-  @UseGuards(AccessTokenAuthGuard)
-  @Get(categoriesPath.me)
-  async getMe(@Req() req: HttpRequestWithUser): Promise<string> {
-    // return GetMyCategoriesResponse.getSuccess(categoriesPath.me, [new MyCategory()])
-    return '';
   }
 
   @ApiBearerAuth()

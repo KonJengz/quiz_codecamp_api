@@ -22,7 +22,7 @@ export class CreateQuestionDto {
   @ApiProperty({ type: String })
   @IsString()
   @MinLength(3)
-  name: Question['title'];
+  title: Question['title'];
 
   @ApiProperty({ type: String })
   @IsString()
@@ -32,6 +32,9 @@ export class CreateQuestionDto {
   @IsString()
   @MinLength(5)
   starterCode: Question['starterCode'];
+  @ApiProperty({ type: String })
+  @IsString()
+  variableName: Question['variableName'];
   @ApiProperty({ type: String })
   @IsString()
   @MinLength(5)
