@@ -28,8 +28,15 @@ export class ErrorApiResponse {
     );
   }
 
-  public static unauthorized(message?: string): HttpException {
-    let responseMessage: string = message ?? 'This request is unauthorized.';
+  public static unauthorized(message?: string | 'identifier'): HttpException {
+    let responseMessage: string;
+    switch (message) {
+      case 'identifier':
+        responseMessage = 'The identifier is invalid.';
+        break;
+      default:
+        responseMessage = 'This request is unauthorized.';
+    }
 
     return new HttpException(
       new ErrorApiResponse(responseMessage),

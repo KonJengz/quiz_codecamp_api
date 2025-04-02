@@ -14,6 +14,7 @@ export class QuestionDocumentRepository implements QuestionRepository {
   ) {}
   private mockQuestion = new Question({
     id: '',
+    variableName: '',
     category: { id: '', isChallenge: false, name: '' },
     testCases: [],
     title: '',

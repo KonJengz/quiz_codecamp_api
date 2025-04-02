@@ -9,5 +9,6 @@ import { UsersModule } from 'src/resources/users/users.module';
   imports: [UsersModule, ConfigModule.forFeature(authConfig)],
   controllers: [AuthController],
   providers: [AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}

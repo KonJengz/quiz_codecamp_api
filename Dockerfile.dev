@@ -19,6 +19,6 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY tsconfig*.json ./
 COPY --from=builder /app/dist ./dist
-EXPOSE ${APP_PORT}
+EXPOSE ${APP_PORT:-8080}
 
 CMD ["npm", "run", "start"]

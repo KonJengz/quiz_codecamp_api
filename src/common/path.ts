@@ -4,6 +4,7 @@ const CATEGORIES_PATH = 'categories';
 const QUESTIONS_PATH = 'questions';
 const SUBMISSIONS_PATH = 'submissions';
 const HEALTH_PATH = 'healthcheck';
+const EXECUTE_PATH = 'executes';
 
 export const authPath = {
   base: AUTH_PATH,
@@ -20,12 +21,18 @@ export const userPath = {
 
 export const categoriesPath = {
   base: CATEGORIES_PATH,
+  me: 'me',
   paramId: 'categoryId',
 };
 
 export const questionsPath = {
   base: QUESTIONS_PATH,
 };
+
 export const submissionsPath = {
   base: SUBMISSIONS_PATH,
+};
+
+export const executesPath = {
+  base: EXECUTE_PATH,
 };

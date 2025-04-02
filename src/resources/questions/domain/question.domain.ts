@@ -25,6 +25,8 @@ export class Question extends BaseDomain {
   solution: string;
   @ApiProperty({ type: CategoryForQuestion })
   category: CategoryForQuestion;
+  @ApiProperty({ type: String })
+  variableName: string;
 
   @ApiProperty({ type: TestCase })
   testCases: TestCase[];
@@ -38,6 +40,7 @@ export class Question extends BaseDomain {
       category,
       createdAt,
       title,
+      variableName,
       updatedAt,
       deletedAt,
     } = input;
@@ -46,6 +49,7 @@ export class Question extends BaseDomain {
 
     this.title = title;
     this.description = description;
+    this.variableName = variableName;
     this.solution = solution;
     this.starterCode = starterCode;
     this.category = category;

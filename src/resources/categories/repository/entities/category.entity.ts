@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, now } from 'mongoose';
-import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 export type CategorySchemaDocument = HydratedDocument<CategorySchemaClass>;
@@ -33,22 +32,7 @@ export class CategorySchemaClass extends EntityDocumentHelper {
     ],
     default: [],
   })
-  questions: QuestionSchemaClass['id'][];
-
-  @Prop({
-    default: now,
-  })
-  createdAt: Date;
-
-  @Prop({
-    default: now,
-  })
-  updatedAt: Date;
-
-  @Prop({
-    required: false,
-  })
-  deletedAt?: Date;
+  questions: Types.ObjectId;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(CategorySchemaClass);

@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, Inject, Logger } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
@@ -7,7 +13,9 @@ import { AllConfigEnum } from 'src/config/types/all-config.type';
 import { AuthConfig } from 'src/config/types/auth-config.type';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { RoleEnum } from 'src/resources/users/domain/user.domain';
+import { AuthService } from '../auth.service';
 
+@Injectable()
 export class AccessTokenAuthGuard implements CanActivate {
   private logger: Logger = new Logger(AccessTokenAuthGuard.name);
 
@@ -15,6 +23,7 @@ export class AccessTokenAuthGuard implements CanActivate {
     @Inject(JwtService)
     private jwtService: JwtService,
     private configService: ConfigService,
+    private authService: AuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -31,6 +40,10 @@ export class AccessTokenAuthGuard implements CanActivate {
       });
 
       const { userId } = request.params;
+
+      const isUserExist = await this.authService.validateUser(payload.sub);
+
+      if (!isUserExist) throw ErrorApiResponse.unauthorized('identifier');
 
       if (userId && userId !== payload.sub) {
         if (payload.role !== RoleEnum.Admin)

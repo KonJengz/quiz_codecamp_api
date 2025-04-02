@@ -37,6 +37,10 @@ export class AuthService {
     return isUserExist;
   }
 
+  async validateUser(id: User['id']): Promise<User> {
+    return this.userService.getById(id);
+  }
+
   async generateToken(payload: JwtPayloadType): Promise<string> {
     return this.jwtService.signAsync(payload, {
       secret: this.accessTokenSecret,

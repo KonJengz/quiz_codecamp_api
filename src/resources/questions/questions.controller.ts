@@ -9,7 +9,7 @@ import { ApiBearerAuth, ApiBody, ApiCreatedResponse } from '@nestjs/swagger';
 import { AccessTokenAuthGuard } from 'src/application/auth/guard/access-token.guard';
 import { AdminGuard } from 'src/application/auth/guard/admin.guard';
 
-@Controller({ version: 'v1', path: questionsPath.base })
+@Controller({ version: '1', path: questionsPath.base })
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 

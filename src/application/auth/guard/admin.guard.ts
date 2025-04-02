@@ -1,9 +1,15 @@
-import { CanActivate, ExecutionContext, Logger } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { HttpRequestWithUser } from 'src/common/types/http.type';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { RoleEnum } from 'src/resources/users/domain/user.domain';
 import { ObjectHelper } from 'src/utils/object.helper';
 
+@Injectable()
 export class AdminGuard implements CanActivate {
   private logger: Logger = new Logger(AdminGuard.name);
 
