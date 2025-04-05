@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
+import { TestCaseSchema } from 'src/resources/test-cases/repository/entities/test-cases.entities';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 export const SUBMISSIONS_JOIN_CONST = 'submissions';
@@ -81,12 +82,10 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   variableName: string;
 
   @Prop({
-    type: [
-      { type: mongoose.Schema.Types.ObjectId, ref: 'TestCaseSchemaClass' },
-    ],
+    type: [TestCaseSchema],
     default: [],
   })
-  testCases: Types.ObjectId[];
+  testCases: TestCaseSchemaClass[];
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(QuestionSchemaClass);

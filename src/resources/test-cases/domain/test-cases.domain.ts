@@ -4,10 +4,10 @@ import { BaseDomain } from 'src/common/base-domain';
 type TestCaseConstructorInput = TestCase;
 
 export class TestCase extends BaseDomain {
-  @ApiProperty({ type: String })
-  input: string;
-  @ApiProperty({ type: String })
-  output: string;
+  @ApiProperty()
+  input: any[];
+  @ApiProperty()
+  output: any;
 
   constructor(data: TestCaseConstructorInput) {
     const { id, createdAt, updatedAt, deletedAt, input, output } = data;

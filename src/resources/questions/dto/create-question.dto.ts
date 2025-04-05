@@ -1,17 +1,40 @@
 import { Category } from 'src/resources/categories/domain/categories.domain';
 import { Question } from '../domain/question.domain';
-import { CreateTestCaseDto } from './create-testCase.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsString, MinLength, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsObject,
+  IsString,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { TestCase } from '../domain/testCase.domain';
 import { CoreApiResponse } from 'src/core/api-response';
+import { TestCase } from 'src/resources/test-cases/domain/test-cases.domain';
 
-class CreateTestCaseSimulWithQuestion {
-  @IsString()
+export class CreateTestCaseSimulWithQuestion {
+  id: null;
+  createdAt: null;
+  updatedAt: null;
+  deletedAt: null;
+  @ApiProperty()
+  @IsNotEmpty()
   input: TestCase['input'];
-  @IsString()
+  @ApiProperty({ type: String })
+  @IsNotEmpty()
   output: TestCase['output'];
+}
+
+class TestVariable {
+  @ApiProperty({ type: String })
+  @IsString()
+  variableName: Question['variableName'];
+
+  @ApiProperty({ type: String })
+  @IsBoolean()
+  isFunction: boolean;
 }
 
 export class CreateQuestionDto {
@@ -32,9 +55,11 @@ export class CreateQuestionDto {
   @IsString()
   @MinLength(5)
   starterCode: Question['starterCode'];
-  @ApiProperty({ type: String })
-  @IsString()
-  variableName: Question['variableName'];
+  @ApiProperty({ type: TestVariable })
+  @IsObject()
+  @ValidateNested({ each: true })
+  @Type(() => TestVariable)
+  testVariable: TestVariable;
   @ApiProperty({ type: String })
   @IsString()
   @MinLength(5)
@@ -43,7 +68,7 @@ export class CreateQuestionDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateTestCaseSimulWithQuestion)
-  testCase: CreateTestCaseSimulWithQuestion[];
+  testCases: CreateTestCaseSimulWithQuestion[];
 }
 
 export class CreateQuestionResponse extends CoreApiResponse<Question> {

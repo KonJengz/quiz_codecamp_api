@@ -9,6 +9,7 @@ import {
 } from './codeExecutor-abstract.service';
 import * as ivm from 'isolated-vm';
 import { ErrorApiResponse } from 'src/core/error-response';
+import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
 
 export enum TestCaseMatcherEnum {
   toBe = 'toBe',
@@ -24,11 +25,20 @@ type TestResultType = {
 };
 
 export interface ITestCase {
+  /**
+   * Result from function return
+   */
   result?: boolean;
+  /**
+   * Expect as a variable name if it's not a function case
+   */
   expect?: string;
   matcher: TestCaseMatcherEnum;
-  expected: unknown;
-  input?: unknown[];
+  /**
+   * Expected results
+   */
+  expected: string;
+  input?: string;
 }
 
 export type ResultsFromExecuted = {
@@ -120,12 +130,13 @@ export class IVMCodeExecutor implements CodeExecutorService {
   public async submit(
     code: string,
     testCases: ITestCase[],
-    isFunction: boolean,
+    questionDetails: { isFunction: boolean; variableName: string },
     options?: CodeExecutionOptions,
   ): Promise<SubmittedCodeResult> {
     let isolate: ivm.Isolate;
     let results: TestedCodeResults;
     let status: CodeExecutionEnum;
+    const { isFunction, variableName } = questionDetails;
     try {
       const { context } = await this.sandbox(options);
 
@@ -135,7 +146,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
             code,
             context,
             testCases,
-            fnName: 'calculator',
+            fnName: variableName,
           });
         results = testResult;
         status = passed ? CodeExecutionEnum.Success : CodeExecutionEnum.Fail;
@@ -220,7 +231,11 @@ export class IVMCodeExecutor implements CodeExecutorService {
             throw ErrorApiResponse.internalServerError(
               `The test case does not provide input or output. Please try again.`,
             );
-          const invokedCode = `${code} \n ${fnName}(${testCase.input})`;
+
+          const inputs = this.parseInputToOriginalValue(testCase.input).join(
+            ', ',
+          );
+          const invokedCode = `${code} \n ${fnName}(${inputs})`;
           const result = await context.eval(invokedCode);
           const assertionCode = this.generateAssertionCode(testCase, result);
           const testResult = await context.eval(assertionCode, {
@@ -240,7 +255,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
             actual: '',
             expected: '',
             testCase: numOrder,
-            error: 'There is an error while testing code.',
+            error: `There is an error while testing code: ${err?.message}`,
           });
           passed = false;
         }
@@ -341,7 +356,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
         `No input for test. Please try again.`,
       );
 
-    let assertionCode = `expect(${expectToTest}).${testCase.matcher}(${testCase.expected})`;
+    let assertionCode = `expect(${expectToTest}).${testCase.matcher}(${this.parseInputToOriginalValue(testCase.expected)})`;
 
     return `
     (() => {
@@ -352,5 +367,26 @@ export class IVMCodeExecutor implements CodeExecutorService {
    return JSON.stringify(__result__)
     })()
   `;
+  }
+
+  public generateTestCase(
+    testCases: CreateQuestionDto['testCases'],
+  ): ITestCase[] {
+    return testCases.map(({ input, output }) => ({
+      expected: this.changeToGeneratorFunc(output),
+      matcher: TestCaseMatcherEnum.toBe,
+      input: this.changeToGeneratorFunc(input),
+    }));
+  }
+
+  public parseInputToOriginalValue(
+    inputGenerator: ITestCase['input'],
+  ): unknown[] {
+    const generateInputs = new Function(`return ${inputGenerator}`)();
+    return generateInputs();
+  }
+
+  public changeToGeneratorFunc(input: any[]) {
+    return `() => ${input}`;
   }
 }

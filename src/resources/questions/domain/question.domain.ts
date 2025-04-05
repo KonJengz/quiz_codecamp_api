@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseDomain } from 'src/common/base-domain';
 import { Category } from 'src/resources/categories/domain/categories.domain';
-import { TestCase } from './testCase.domain';
+import { TestCase } from '../../test-cases/domain/test-cases.domain';
 
 type QuestionConstructorInput = Question;
 

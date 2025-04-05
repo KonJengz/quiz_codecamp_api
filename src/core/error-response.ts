@@ -19,6 +19,7 @@ export class ErrorApiResponse {
         break;
       default:
         responseMessage =
+          message ??
           'Bad Request due to malsyntax request body or invalid request.';
         break;
     }

@@ -1,4 +1,5 @@
 import { ITestCase } from './codeExecutor.service';
+import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
 
 export enum CodeExecutionEnum {
   Success = 'SUCCESS',
@@ -43,13 +44,28 @@ export type TestResultType = {
   error: string;
 };
 
+export type TestVarialbeQuestionDetail = {
+  isFunction: boolean;
+  variableName: string;
+};
+
 export abstract class CodeExecutorService {
   public abstract execute(code: string): Promise<CodeExecutionResult>;
 
   public abstract submit(
     code: string,
     testCases: ITestCase[],
-    isFunction: boolean,
+    questionDetails: TestVarialbeQuestionDetail,
     options?: CodeExecutionOptions,
   ): Promise<SubmittedCodeResult>;
+
+  public abstract generateTestCase(
+    testCases: CreateQuestionDto['testCases'],
+  ): ITestCase[];
+
+  public abstract parseInputToOriginalValue(
+    input: ITestCase['input'],
+  ): unknown[];
+
+  public abstract changeToGeneratorFunc(input: any[]): string;
 }

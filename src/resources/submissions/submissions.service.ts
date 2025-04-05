@@ -39,26 +39,24 @@ export class SubmissionsService extends Service<Submission> {
     const testCases: ITestCase[] = [
       {
         matcher: TestCaseMatcherEnum.toBe,
-        expected: 6,
-        input: [2, 4],
+        expected: '',
+        input: '',
       },
       {
         matcher: TestCaseMatcherEnum.toBe,
-        expected: 154,
-        input: [100, 54],
+        expected: '',
+        input: '',
       },
       {
         matcher: TestCaseMatcherEnum.toBe,
-        expected: 15,
-        input: [7, 8],
+        expected: '',
+        input: '',
       },
     ];
-    const result = await this.codeExecutorService.submit(
-      userCode,
-      testCases,
-      true,
-    );
-    console.log(result);
+    const result = await this.codeExecutorService.submit(userCode, testCases, {
+      isFunction: true,
+      variableName: 'hehe',
+    });
     return result;
   }
 

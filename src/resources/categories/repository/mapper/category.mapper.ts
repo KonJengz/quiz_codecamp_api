@@ -5,8 +5,9 @@ export class CategoryMapper {
   public static toDomain(documentEntity: CategorySchemaClass): Category {
     // If there are no document entity provided, return null
     if (!documentEntity) return null;
+    const docObj = documentEntity.toObject();
 
-    return new Category(documentEntity.toObject());
+    return new Category({ ...docObj, id: docObj._id.toString() });
   }
 
   public static toMyCategoryDomain(
