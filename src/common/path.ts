@@ -27,6 +27,10 @@ export const categoriesPath = {
 
 export const questionsPath = {
   base: QUESTIONS_PATH,
+  getById: ':questionId',
+  paramId: 'questionId',
+  category: `${categoriesPath.base}/:${categoriesPath.paramId}`,
+  categoryParam: `${categoriesPath.paramId}`,
 };
 
 export const submissionsPath = {

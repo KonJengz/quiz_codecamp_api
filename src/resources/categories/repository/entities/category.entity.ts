@@ -33,6 +33,13 @@ export class CategorySchemaClass extends EntityDocumentHelper {
     default: [],
   })
   questions: Types.ObjectId;
+
+  @Prop({ type: Date, required: false, default: null })
+  deletedAt?: Date;
+
+  public static get questionsPopulatePath(): 'questions' {
+    return 'questions';
+  }
 }
 
 export const CategorySchema = SchemaFactory.createForClass(CategorySchemaClass);

@@ -1,5 +1,5 @@
-import { Question } from '../domain/question.domain';
-import { TestCase } from '../../test-cases/domain/test-cases.domain';
+import { Question } from '../../questions/domain/question.domain';
+import { TestCase } from '../domain/test-cases.domain';
 
 export class CreateTestCaseDto {
   questionId: Question['id'];

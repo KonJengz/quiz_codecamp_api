@@ -1,10 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
+import {
+  CategorySchema,
+  CategorySchemaClass,
+} from 'src/resources/categories/repository/entities/category.entity';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
 import { TestCaseSchema } from 'src/resources/test-cases/repository/entities/test-cases.entities';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 export const SUBMISSIONS_JOIN_CONST = 'submissions';
+export const CATEGORY_JOIN_CONST = 'category';
 
 export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
 
@@ -82,10 +87,26 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   variableName: string;
 
   @Prop({
+    type: Boolean,
+    required: true,
+  })
+  isFunction: boolean;
+
+  @Prop({
     type: [TestCaseSchema],
     default: [],
   })
   testCases: TestCaseSchemaClass[];
+
+  @Prop({ type: Date, required: false, default: null })
+  deletedAt?: Date;
+
+  public static get categoryJoinField(): 'category' {
+    return 'category';
+  }
+  public static get testCaseJoinField(): 'testCases' {
+    return 'testCases';
+  }
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(QuestionSchemaClass);
@@ -95,3 +116,19 @@ QuestionSchema.virtual(SUBMISSIONS_JOIN_CONST, {
   localField: '_id',
   foreignField: 'questionId',
 });
+
+QuestionSchema.virtual(QuestionSchemaClass.categoryJoinField, {
+  ref: CategorySchemaClass.name,
+  localField: 'categoryId',
+  foreignField: '_id',
+});
+
+// QuestionSchema.post('save', async (document) => {
+//   const categoryModel = mongoose.model(
+//     `${CategorySchemaClass.name}`,
+//     CategorySchema,
+//   );
+//   await categoryModel.findByIdAndUpdate(document.categoryId, {
+//     $push: { questions: document._id },
+//   });
+// });

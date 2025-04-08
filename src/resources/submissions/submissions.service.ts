@@ -10,6 +10,8 @@ import {
   ITestCase,
   TestCaseMatcherEnum,
 } from 'src/infrastructure/executor/codeExecutor.service';
+import { QuestionsService } from '../questions/questions.service';
+import { ErrorApiResponse } from 'src/core/error-response';
 
 @Injectable()
 export class SubmissionsService extends Service<Submission> {
@@ -22,42 +24,44 @@ export class SubmissionsService extends Service<Submission> {
     userId: '',
   });
 
-  constructor(private readonly codeExecutorService: CodeExecutorService) {
+  constructor(
+    private readonly codeExecutorService: CodeExecutorService,
+    private readonly questionsService: QuestionsService,
+  ) {
     super();
   }
 
   private executeCode() {}
 
   override async create(data: CreateSubmissionInput): Promise<Submission> {
-    const resultObj = await this.testCode(data.code);
+    const isQuestionsExist = await this.questionsService.getById(
+      data.questionId,
+    );
+
+    if (!isQuestionsExist)
+      throw ErrorApiResponse.notFound('ID', data.questionId, 'Question');
+
+    if (!isQuestionsExist.testCases || isQuestionsExist.testCases.length === 0)
+      throw ErrorApiResponse.conflictRequest(
+        `The question ID: ${isQuestionsExist} does not have any test case. Please contact developer to adding test case before submitting.`,
+      );
+
+    const resultObj = await this.runUserCodeWithTest(data.code);
+
+    console.log(resultObj);
+
     return Promise.resolve(this.mockSubmission);
   }
 
-  private async testCode(
+  private async runUserCodeWithTest(
     userCode: CreateSubmissionInput['code'],
   ): Promise<SubmittedCodeResult> {
-    const testCases: ITestCase[] = [
-      {
-        matcher: TestCaseMatcherEnum.toBe,
-        expected: '',
-        input: '',
-      },
-      {
-        matcher: TestCaseMatcherEnum.toBe,
-        expected: '',
-        input: '',
-      },
-      {
-        matcher: TestCaseMatcherEnum.toBe,
-        expected: '',
-        input: '',
-      },
-    ];
-    const result = await this.codeExecutorService.submit(userCode, testCases, {
-      isFunction: true,
-      variableName: 'hehe',
-    });
-    return result;
+    // const result = await this.codeExecutorService.submit(userCode, testCases, {
+    //   isFunction: true,
+    //   variableName: 'hehe',
+    // });
+    // return result;
+    return null;
   }
 
   getById(id: string): Promise<Submission> {

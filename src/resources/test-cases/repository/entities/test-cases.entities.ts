@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SchemaType, SchemaTypes, Types } from 'mongoose';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 @Schema({
@@ -10,15 +11,15 @@ import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 })
 export class TestCaseSchemaClass extends EntityDocumentHelper {
   @Prop({
-    type: [String],
+    type: [SchemaTypes.Mixed],
     required: true,
   })
-  input: string[];
+  input: any[];
   @Prop({
-    type: String,
+    type: SchemaTypes.Mixed,
     required: true,
   })
-  output: string;
+  output: any;
   @Prop({
     required: false,
   })

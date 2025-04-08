@@ -9,6 +9,8 @@ import {
   CodeExecutionEnum,
   CodeExecutorService,
 } from 'src/infrastructure/executor/codeExecutor-abstract.service';
+import { Category } from '../categories/domain/categories.domain';
+import { IDValidator } from 'src/utils/IDValidatior';
 
 @Injectable()
 export class QuestionsService implements Service<Question> {
@@ -19,7 +21,7 @@ export class QuestionsService implements Service<Question> {
   ) {}
 
   private arrowFnRegex = new RegExp(/\=\s*\(\s*\)\s*=>/);
-  private functionRegex = new RegExp(/function\s*\(/);
+  private functionRegex = new RegExp(/function\s+(\w+\s*)?\(/);
 
   async create(data: CreateQuestionDto): Promise<Question> {
     const isCategoryExist = await this.categoriesService.getById(
@@ -45,8 +47,23 @@ export class QuestionsService implements Service<Question> {
   }
 
   getById(id: Question['id']): Promise<Question> {
+    // Validate ID before proceed.
+    IDValidator(id, 'Question');
     return this.questionRepository.findById(id);
   }
+
+  async getByCategoryId(categoryId: Category['id']): Promise<Question[]> {
+    // Validate ID before proceed.
+    IDValidator(categoryId, 'Category');
+
+    const isCategoryExist = await this.categoriesService.getById(categoryId);
+
+    if (!isCategoryExist)
+      throw ErrorApiResponse.notFound(`ID`, categoryId, 'Category');
+
+    return this.questionRepository.findByCategoryId(categoryId);
+  }
+
   getMany(): Promise<Question[]> {
     return this.questionRepository.findMany();
   }
@@ -60,11 +77,11 @@ export class QuestionsService implements Service<Question> {
     const { starterCode, solution, testVariable, testCases } = data;
     const { isFunction, variableName } = testVariable;
 
-    console.log('A');
     if (!starterCode.includes(variableName))
       throw ErrorApiResponse.badRequest(
         `The variable name: ${variableName} is not exists in startercode`,
       );
+
     if (!solution.includes(variableName))
       throw ErrorApiResponse.badRequest(
         `The variable name: ${variableName} is not exist in solution`,
@@ -82,7 +99,6 @@ export class QuestionsService implements Service<Question> {
     }
 
     const genTestCase = this.codeExecutionService.generateTestCase(testCases);
-    console.log('Test case', genTestCase);
     const testResults = await this.codeExecutionService.submit(
       solution,
       genTestCase,

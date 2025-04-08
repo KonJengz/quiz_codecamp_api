@@ -6,6 +6,7 @@ import {
   CodeExecutorService,
   SubmittedCodeResult,
   TestedCodeResults,
+  ValidateCodeInput,
 } from './codeExecutor-abstract.service';
 import * as ivm from 'isolated-vm';
 import { ErrorApiResponse } from 'src/core/error-response';
@@ -37,8 +38,8 @@ export interface ITestCase {
   /**
    * Expected results
    */
-  expected: string;
-  input?: string;
+  expected: any;
+  input: any[];
 }
 
 export type ResultsFromExecuted = {
@@ -232,10 +233,10 @@ export class IVMCodeExecutor implements CodeExecutorService {
               `The test case does not provide input or output. Please try again.`,
             );
 
-          const inputs = this.parseInputToOriginalValue(testCase.input).join(
-            ', ',
-          );
-          const invokedCode = `${code} \n ${fnName}(${inputs})`;
+          // const inputs = this.parseInputToOriginalValue(testCase.input).join(
+          //   ', ',
+          // );
+          const invokedCode = `${code} \n ${fnName}(${testCase.input.join(',')})`;
           const result = await context.eval(invokedCode);
           const assertionCode = this.generateAssertionCode(testCase, result);
           const testResult = await context.eval(assertionCode, {
@@ -356,7 +357,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
         `No input for test. Please try again.`,
       );
 
-    let assertionCode = `expect(${expectToTest}).${testCase.matcher}(${this.parseInputToOriginalValue(testCase.expected)})`;
+    let assertionCode = `expect(${expectToTest}).${testCase.matcher}(${testCase.expected})`;
 
     return `
     (() => {
@@ -373,20 +374,49 @@ export class IVMCodeExecutor implements CodeExecutorService {
     testCases: CreateQuestionDto['testCases'],
   ): ITestCase[] {
     return testCases.map(({ input, output }) => ({
-      expected: this.changeToGeneratorFunc(output),
+      expected: output,
       matcher: TestCaseMatcherEnum.toBe,
-      input: this.changeToGeneratorFunc(input),
+      input: input,
     }));
   }
 
-  public parseInputToOriginalValue(
-    inputGenerator: ITestCase['input'],
-  ): unknown[] {
-    const generateInputs = new Function(`return ${inputGenerator}`)();
-    return generateInputs();
+  public validateCode(input: ValidateCodeInput): Promise<boolean> {
+    const { starterCode, solution, testVariable, testCases } = data;
+    const { isFunction, variableName } = testVariable;
+
+    if (!starterCode.includes(variableName))
+      throw ErrorApiResponse.badRequest(
+        `The variable name: ${variableName} is not exists in startercode`,
+      );
+
+    if (!solution.includes(variableName))
+      throw ErrorApiResponse.badRequest(
+        `The variable name: ${variableName} is not exist in solution`,
+      );
+
+    if (isFunction) {
+      const isTestVariableAFn = [starterCode, solution].every((code) =>
+        this.validateFunctionSyntax(code),
+      );
+
+      if (!isTestVariableAFn)
+        throw ErrorApiResponse.badRequest(
+          `Provided question as function but the solution does not contain any function syntax.`,
+        );
+    }
+  }
+  private validateFunctionSyntax(code: string) {
+    return this.arrowFnRegex.test(code) || this.functionRegex.test(code);
   }
 
-  public changeToGeneratorFunc(input: any[]) {
-    return `() => ${input}`;
-  }
+  // public parseInputToOriginalValue(
+  //   inputGenerator: ITestCase['input'],
+  // ): unknown[] {
+  //   const generateInputs = new Function(`return ${inputGenerator}`)();
+  //   return generateInputs();
+  // }
+
+  // public changeToGeneratorFunc(input: any[]) {
+  //   return `() => ${input}`;
+  // }
 }

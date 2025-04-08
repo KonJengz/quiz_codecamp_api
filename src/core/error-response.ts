@@ -45,6 +45,13 @@ export class ErrorApiResponse {
     );
   }
 
+  /**
+   *
+   * @param {String | "ID"} message
+   * @param {String} id
+   * @param {String } type - The domain of the id such as "User", "Questions" or any domain
+   * @returns {HttpException} error
+   */
   public static notFound(message?: 'ID' | string, id?: string, type?: string) {
     let respMsg: string;
 

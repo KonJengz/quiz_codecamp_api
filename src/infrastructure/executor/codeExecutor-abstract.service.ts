@@ -49,6 +49,11 @@ export type TestVarialbeQuestionDetail = {
   variableName: string;
 };
 
+export type ValidateCodeInput = {
+  code: string;
+  detail: TestVarialbeQuestionDetail;
+};
+
 export abstract class CodeExecutorService {
   public abstract execute(code: string): Promise<CodeExecutionResult>;
 
@@ -63,9 +68,11 @@ export abstract class CodeExecutorService {
     testCases: CreateQuestionDto['testCases'],
   ): ITestCase[];
 
-  public abstract parseInputToOriginalValue(
-    input: ITestCase['input'],
-  ): unknown[];
+  public abstract validateCode(input: ValidateCodeInput): Promise<boolean>;
 
-  public abstract changeToGeneratorFunc(input: any[]): string;
+  // public abstract parseInputToOriginalValue(
+  //   input: ITestCase['input'],
+  // ): unknown[];
+
+  // public abstract changeToGeneratorFunc(input: any[]): string;
 }
