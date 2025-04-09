@@ -6,6 +6,10 @@ import {
 } from './entities/questions.entity';
 import { QuestionRepository } from './questions-abstract.repository';
 import { QuestionDocumentRepository } from './questions.repository';
+import {
+  CategorySchema,
+  CategorySchemaClass,
+} from 'src/resources/categories/repository/entities/category.entity';
 
 @Module({
   imports: [
@@ -13,6 +17,10 @@ import { QuestionDocumentRepository } from './questions.repository';
       {
         name: QuestionSchemaClass.name,
         schema: QuestionSchema,
+      },
+      {
+        name: CategorySchemaClass.name,
+        schema: CategorySchema,
       },
     ]),
   ],

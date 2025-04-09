@@ -44,6 +44,8 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
 
   async findMany(): Promise<Category[]> {
     const categoryObj = await this.categoryModel.find();
+    // .populate(CategorySchemaClass.questionsPopulatePath);
+    console.log(categoryObj);
     return categoryObj.map(CategoryMapper.toDomain);
   }
 

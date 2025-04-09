@@ -19,6 +19,7 @@ export class ErrorApiResponse {
         break;
       default:
         responseMessage =
+          message ??
           'Bad Request due to malsyntax request body or invalid request.';
         break;
     }
@@ -40,10 +41,17 @@ export class ErrorApiResponse {
 
     return new HttpException(
       new ErrorApiResponse(responseMessage),
-      HttpStatus.BAD_REQUEST,
+      HttpStatus.UNAUTHORIZED,
     );
   }
 
+  /**
+   *
+   * @param {String | "ID"} message
+   * @param {String} id
+   * @param {String } type - The domain of the id such as "User", "Questions" or any domain
+   * @returns {HttpException} error
+   */
   public static notFound(message?: 'ID' | string, id?: string, type?: string) {
     let respMsg: string;
 

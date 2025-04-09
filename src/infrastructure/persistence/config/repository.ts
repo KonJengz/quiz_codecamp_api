@@ -1,7 +1,15 @@
+import { BaseDomain } from 'src/common/base-domain';
 import { NullAble } from 'src/common/types/types';
 
-export abstract class Repository<T extends { id: string }> {
-  abstract create<U extends Partial<T>>(data: U): Promise<T>;
+type CreateDto<T extends BaseDomain> = Partial<
+  Omit<T, 'createdAt' | 'updatedAt' | 'deletedAt'>
+>;
+
+export abstract class Repository<
+  T extends BaseDomain,
+  U extends CreateDto<T> = CreateDto<T>,
+> {
+  abstract create(data: U): Promise<T>;
 
   abstract findById(id: T['id']): Promise<NullAble<T>>;
 

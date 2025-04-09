@@ -4,38 +4,63 @@ import {
   CodeExecutionOptions,
   CodeExecutionResult,
   CodeExecutorService,
+  SubmittedCodeResult,
+  TestedCodeResults,
+  ValidateCodeInput,
+  ValidateCodeOutput,
 } from './codeExecutor-abstract.service';
 import * as ivm from 'isolated-vm';
 import { ErrorApiResponse } from 'src/core/error-response';
+import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
 
 export enum TestCaseMatcherEnum {
   toBe = 'toBe',
 }
 
+type TestResultType = {
+  passed: boolean;
+  detail: {
+    actual: unknown;
+    expected: unknown;
+  };
+  error: string;
+};
+
 export interface ITestCase {
+  /**
+   * Result from function return
+   */
   result?: boolean;
+  /**
+   * Expect as a variable name if it's not a function case
+   */
   expect?: string;
   matcher: TestCaseMatcherEnum;
-  expected: string;
-  input?: unknown[];
+  /**
+   * Expected results
+   */
+  expected: any;
+  input: any[];
 }
+
+export type ResultsFromExecuted = {
+  results: TestedCodeResults;
+  passed: boolean;
+};
 
 export class IVMCodeExecutor implements CodeExecutorService {
   private readonly logger: Logger = new Logger(IVMCodeExecutor.name);
 
+  private arrowFnRegex = new RegExp(/\=\s*\(\s*\)\s*=>/);
+  private functionRegex = new RegExp(/function\s+(\w+\s*)?\(/);
+
   private ivmConfig = {
-    memoryLimit: 128,
+    memoryLimit: 8,
     maxExecutionCount: 1000,
     timeout: 5000,
   };
 
-  private generateConsole({
-    debug,
-    logs,
-  }: {
-    debug: boolean;
-    logs: string[];
-  }): string {
+  private generateConsole(): string {
     const func = `const console = {
     _logs: [],
     log: function(...args) {
@@ -44,18 +69,15 @@ export class IVMCodeExecutor implements CodeExecutorService {
         typeof arg === 'object' && arg !== null ? JSON.stringify(arg) : String(arg)
       ).join(' '));
     },
-    // Add other console methods as needed
   };`;
 
     return func;
   }
 
-  public async execute(
-    code: string,
-    isFunction: boolean,
-    testCases: ITestCase[] = [],
-    options: CodeExecutionOptions = {},
-  ): Promise<CodeExecutionResult> {
+  private async sandbox(options: CodeExecutionOptions = {}): Promise<{
+    context: ivm.Context;
+    isolate: ivm.Isolate;
+  }> {
     const { debug, timeout, maxExecutionCount, memoryLimit } = options;
     const config = {
       memoryLimit: memoryLimit || this.ivmConfig.memoryLimit,
@@ -64,94 +86,191 @@ export class IVMCodeExecutor implements CodeExecutorService {
       debug: debug || false,
     };
 
-    // Array to collect all logs
-    const allLogs: string[] = [];
-
     const isolate = new ivm.Isolate({ memoryLimit: config.memoryLimit });
     try {
       const context = await isolate.createContext();
       const jail = context.global;
 
       await jail.set('console', {}, { copy: true });
-      const func = this.generateConsole({
-        debug: config.debug,
-        logs: allLogs,
-      });
-      await context.eval(func);
-      let results;
+      const generateConsoleFunc = this.generateConsole();
+      // Setting up console for context.
+      await context.eval(generateConsoleFunc);
+      return { context, isolate };
+    } catch (err) {
+      this.logger.error(err?.message);
+    }
+  }
 
-      if (isFunction) {
-        results = await this.executeFnCode({ code, context, testCases });
-      } else {
-        results = await this.executeNonFnCode({
-          code,
-          context,
-          testCases,
-        });
-      }
+  private async getAllLogFromContext(context: ivm.Context): Promise<string> {
+    return context.eval(`JSON.stringify(console._logs)`);
+  }
 
-      const logs = await context.eval(`JSON.stringify(console._logs)`);
+  public async execute(code: string): Promise<CodeExecutionResult> {
+    let isolate: ivm.Isolate;
+    try {
+      const sandbox = await this.sandbox();
+      const { context } = sandbox;
+      isolate = sandbox.isolate;
+      await context.eval(code);
+
+      const logs = await this.getAllLogFromContext(context);
 
       return {
-        error: null,
+        isError: false,
+        errMsg: null,
         logs: JSON.parse(logs),
-        status: CodeExecutionEnum.Success,
-        testResults: results,
       };
     } catch (err) {
       this.logger.error(err?.message);
       return {
-        error: `There is an system error while setting vm : ${err?.message}`,
-        logs: allLogs,
-        status: CodeExecutionEnum.Fail,
+        isError: true,
+        errMsg: err?.stack,
+        logs: [],
       };
     } finally {
-      if (isolate) {
-        isolate.dispose();
-      }
+      if (isolate) isolate.dispose();
     }
   }
 
-  private async executeFnCode({
+  public async submit(
+    code: string,
+    testCases: ITestCase[],
+    questionDetails: { isFunction: boolean; variableName: string },
+    options?: CodeExecutionOptions,
+  ): Promise<SubmittedCodeResult> {
+    let isolate: ivm.Isolate;
+    let results: TestedCodeResults;
+    let status: CodeExecutionEnum;
+    const { isFunction, variableName } = questionDetails;
+    try {
+      const { context } = await this.sandbox(options);
+
+      if (isFunction) {
+        const { passed, results: testResult } =
+          await this.executeFnCodeWithTest({
+            code,
+            context,
+            testCases,
+            fnName: variableName,
+          });
+        results = testResult;
+        status = passed ? CodeExecutionEnum.Success : CodeExecutionEnum.Fail;
+      } else {
+        const { passed, results: testResult } =
+          await this.executeNonFnCodeWithTest({
+            code,
+            context,
+            testCases,
+          });
+        results = testResult;
+        status = passed ? CodeExecutionEnum.Success : CodeExecutionEnum.Fail;
+      }
+
+      if (!results)
+        throw ErrorApiResponse.internalServerError(
+          'There is an Error on the server while running test.',
+        );
+
+      const logs = await this.getAllLogFromContext(context);
+      return {
+        errMsg: null,
+        isError: false,
+        logs: JSON.parse(logs),
+        status,
+        results,
+      };
+    } catch (err) {
+      this.logger.error(err?.message);
+      return {
+        errMsg: err?.stack,
+        isError: true,
+        logs: [],
+        status,
+        results: { passed: 0, failed: [], total: testCases.length },
+      };
+    } finally {
+      if (isolate) isolate.dispose();
+    }
+  }
+
+  private resolveTestResult(
+    testResults: TestResultType,
+    numOrder: number,
+  ): TestedCodeResults['failed'][number] {
+    if (testResults.passed)
+      throw ErrorApiResponse.internalServerError(
+        'There is an internal server error while resolving test case.',
+      );
+
+    return {
+      actual: testResults.detail.actual,
+      expected: testResults.detail.expected,
+      testCase: numOrder,
+    };
+  }
+
+  private async executeFnCodeWithTest({
     code,
     context,
     testCases,
+    fnName,
   }: {
     code: string;
     context: ivm.Context;
     testCases: ITestCase[];
-  }) {
-    const testResults = [];
+    fnName: string;
+  }): Promise<ResultsFromExecuted> {
+    const results: TestedCodeResults = {
+      failed: [],
+      passed: 0,
+      total: testCases.length,
+    };
+
+    let passed: ResultsFromExecuted['passed'] = true;
 
     if (testCases.length > 0) {
       for (const [index, testCase] of testCases.entries()) {
+        const numOrder = index + 1;
         try {
           if (!(testCase.input && testCase.expected))
             throw ErrorApiResponse.internalServerError(
               `The test case does not provide input or output. Please try again.`,
             );
-          const userFn = new Function('input', code);
 
-          const result = context.eval(userFn(...testCase.input));
+          // const inputs = this.parseInputToOriginalValue(testCase.input).join(
+          //   ', ',
+          // );
+          const invokedCode = `${code} \n ${fnName}(${testCase.input.join(',')})`;
+          const result = await context.eval(invokedCode);
           const assertionCode = this.generateAssertionCode(testCase, result);
-          const testResult = context.eval(assertionCode, {
+          const testResult = await context.eval(assertionCode, {
             timeout: this.ivmConfig.timeout,
           });
-          testResults.push({ ...testResult, testCase: index + 1 });
+          const parsedTestResult: TestResultType = JSON.parse(testResult);
+          if (!parsedTestResult.passed) {
+            results.failed.push(
+              this.resolveTestResult(parsedTestResult, numOrder),
+            );
+            passed = false;
+            continue;
+          }
+          ++results.passed;
         } catch (err) {
-          testResults.push({
-            passed: false,
-            error: `Assertion error: ${err.toString()}`,
-            testCase: index + 1,
+          results.failed.push({
+            actual: '',
+            expected: '',
+            testCase: numOrder,
+            error: `There is an error while testing code: ${err?.message}`,
           });
+          passed = false;
         }
       }
     }
 
-    return testResults;
+    return { results, passed };
   }
 
-  private async executeNonFnCode({
+  private async executeNonFnCodeWithTest({
     code,
     context,
     testCases = [],
@@ -159,63 +278,77 @@ export class IVMCodeExecutor implements CodeExecutorService {
     code: string;
     context: ivm.Context;
     testCases: ITestCase[];
-  }) {
-    const testResults = [];
-    console.log('Code in execute code.', code);
-    await context.eval(code, {
+  }): Promise<ResultsFromExecuted> {
+    const results: TestedCodeResults = {
+      failed: [],
+      passed: 0,
+      total: testCases.length,
+    };
+
+    let passed: ResultsFromExecuted['passed'] = true;
+    console.log('Code', code);
+    const response = await context.eval(code, {
       timeout: this.ivmConfig.timeout,
     });
+    console.log('Response', response);
     if (testCases.length > 0) {
       for (const [index, testCase] of testCases.entries()) {
+        const numOrder = index + 1;
         try {
           const assertionCode = this.generateAssertionCode(testCase);
-          const result = await context.eval(assertionCode, {
+          const testResult: TestResultType = await context.eval(assertionCode, {
             timeout: this.ivmConfig.timeout,
           });
 
-          testResults.push({ ...result, testCase: index + 1 });
+          if (!testResult.passed) {
+            results.failed.push(this.resolveTestResult(testResult, numOrder));
+            passed = false;
+            continue;
+          }
+
+          ++results.passed;
         } catch (err) {
-          testResults.push({
-            passed: false,
-            error: `Assertion error: ${err.toString()}`,
-            testCase: index + 1,
+          passed = false;
+          results.failed.push({
+            actual: '',
+            expected: '',
+            testCase: numOrder,
+            error: 'There is an error while testing code.',
           });
         }
       }
     }
 
-    return testResults;
+    return { results, passed };
   }
 
   private assertionFramework: string = `
-  const __testResults = { passed: false, details: {} };
-
   function expect(actual) {
     return {
       ${TestCaseMatcherEnum.toBe}: (expected) => {
         const passed = actual === expected;
-        __testResults.passed = true;
-        __testResults.details = {
-          actual,
-          expected,
-        };
-        if (!passed) {
-          __testResults.error = \`Expected \${JSON.stringify(actual)} to be \${JSON.stringify(expected)}\`;
+        const result = {
+          passed, 
+          detail : {
+            actual,
+            expected
+          },
+          error: ""
         }
-        return passed;
+        if (!passed) {
+         result.error = \`Expected \${JSON.stringify(actual)} to be \${JSON.stringify(expected)}\` 
+        }
+        return result;
       },
     };
   }
   `;
 
-  private generateAssertionCode(testCase: ITestCase, result?: unknown) {
+  private generateAssertionCode(testCase: ITestCase, result?: unknown): string {
     const assertionFrameWork = this.assertionFramework;
 
     let expectToTest: unknown;
-    if (testCase.result) {
-      if (!result)
-        throw new Error(`Need result for test case but not provided.`);
-
+    if (result) {
       expectToTest = result;
     } else if (testCase.expect) {
       expectToTest = testCase.expect;
@@ -223,19 +356,68 @@ export class IVMCodeExecutor implements CodeExecutorService {
       throw new Error('Wrong detail of test case provided.');
     }
 
+    if (!expectToTest)
+      throw ErrorApiResponse.internalServerError(
+        `No input for test. Please try again.`,
+      );
+
     let assertionCode = `expect(${expectToTest}).${testCase.matcher}(${testCase.expected})`;
 
     return `
+    (() => {
     ${assertionFrameWork}
     
-    try {
-      ${assertionCode};
-    } catch (e) {
-      __testResults.passed = false;
-      __testResults.error = e.toString();
-    }
+    const __result__ = ${assertionCode};
     
-    JSON.stringify(__testResults);
+   return JSON.stringify(__result__)
+    })()
   `;
   }
+
+  public generateTestCase(
+    testCases: CreateQuestionDto['testCases'],
+  ): ITestCase[] {
+    return testCases.map(({ input, output }) => ({
+      expected: output,
+      matcher: TestCaseMatcherEnum.toBe,
+      input: input,
+    }));
+  }
+
+  public validateCode(input: ValidateCodeInput): ValidateCodeOutput {
+    const { codes, detail } = input;
+    const { isFunction, variableName } = detail;
+
+    if (!codes.every((code) => code.includes(variableName)))
+      return {
+        isValid: false,
+        errMsg: `The provided code for checking does not have variable name: ${variableName}`,
+      };
+
+    if (isFunction) {
+      const isFn = codes.every((code) => this.validateFunctionSyntax(code));
+      if (!isFn)
+        return {
+          errMsg:
+            'Provided type of code as a function but the function itself does not have any function syntax. Please try again',
+          isValid: false,
+        };
+    }
+    return { errMsg: null, isValid: true };
+  }
+
+  private validateFunctionSyntax(code: string) {
+    return this.arrowFnRegex.test(code) || this.functionRegex.test(code);
+  }
+
+  // public parseInputToOriginalValue(
+  //   inputGenerator: ITestCase['input'],
+  // ): unknown[] {
+  //   const generateInputs = new Function(`return ${inputGenerator}`)();
+  //   return generateInputs();
+  // }
+
+  // public changeToGeneratorFunc(input: any[]) {
+  //   return `() => ${input}`;
+  // }
 }
