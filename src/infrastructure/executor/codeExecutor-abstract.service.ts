@@ -76,6 +76,8 @@ export abstract class CodeExecutorService {
 
   public abstract validateCode(input: ValidateCodeInput): ValidateCodeOutput;
 
+  public abstract validateFunctionSyntax(code: string): boolean;
+
   // public abstract parseInputToOriginalValue(
   //   input: ITestCase['input'],
   // ): unknown[];
