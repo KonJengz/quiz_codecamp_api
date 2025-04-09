@@ -122,13 +122,3 @@ QuestionSchema.virtual(QuestionSchemaClass.categoryJoinField, {
   localField: 'categoryId',
   foreignField: '_id',
 });
-
-// QuestionSchema.post('save', async (document) => {
-//   const categoryModel = mongoose.model(
-//     `${CategorySchemaClass.name}`,
-//     CategorySchema,
-//   );
-//   await categoryModel.findByIdAndUpdate(document.categoryId, {
-//     $push: { questions: document._id },
-//   });
-// });
