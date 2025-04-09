@@ -1,16 +1,20 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
-import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
-import { UserSchemaClass } from 'src/resources/users/repository/entity/user.entity';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
-
-export enum SubmissionStatusEnum {
-  Accepted = 'ACCEPTED',
-  UnAccepted = 'UNACCEPTED',
-}
+import { SubmissionStatusEnum } from '../../domain/submission.domain';
 
 export type SubmissionDocument = HydratedDocument<SubmissionSchemaClass>;
 
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    getters: true,
+  },
+  toObject: {
+    virtuals: true,
+  },
+})
 export class SubmissionSchemaClass extends EntityDocumentHelper {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -32,7 +36,6 @@ export class SubmissionSchemaClass extends EntityDocumentHelper {
   @Prop({
     enum: SubmissionStatusEnum,
     required: true,
-    default: SubmissionStatusEnum.UnAccepted,
   })
   status: SubmissionStatusEnum;
 }

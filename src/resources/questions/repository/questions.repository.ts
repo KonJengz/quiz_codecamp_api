@@ -1,14 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { QuestionRepository } from './questions-abstract.repository';
-import { Question } from '../domain/question.domain';
+import { Question, QuestionAndSubmission } from '../domain/question.domain';
 import { QuestionSchemaClass } from './entities/questions.entity';
-import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { NullAble } from 'src/common/types/types';
 import { CreateQuestionDto } from '../dto/create-question.dto';
 import { QuestionMapper } from './mapper/question.mapper';
 import { Category } from 'src/resources/categories/domain/categories.domain';
 import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
+import { User } from 'src/resources/users/domain/user.domain';
+import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
 
 @Injectable()
 export class QuestionDocumentRepository implements QuestionRepository {
@@ -18,8 +20,6 @@ export class QuestionDocumentRepository implements QuestionRepository {
     private readonly questionModel: Model<QuestionSchemaClass>,
     @InjectModel(CategorySchemaClass.name)
     private readonly categoryModel: Model<CategorySchemaClass>,
-    @InjectConnection()
-    private readonly mongoConnection: Connection,
   ) {}
 
   private questionPopulateOption = [
@@ -77,7 +77,7 @@ export class QuestionDocumentRepository implements QuestionRepository {
       .findById(id)
       .populate(this.questionPopulateOption);
 
-    return QuestionMapper.toDomain(question);
+    return QuestionMapper.toDomain(question, true);
   }
 
   async findMany(): Promise<Question[]> {
@@ -111,6 +111,26 @@ export class QuestionDocumentRepository implements QuestionRepository {
     return questions.map((question) =>
       QuestionMapper.toDomain(question, false),
     );
+  }
+
+  async findByIdAndUserSubmission(
+    id: Question['id'],
+    userId: User['id'],
+  ): Promise<QuestionAndSubmission> {
+    const questions = await this.questionModel
+      .findById(id)
+      .populate(
+        [
+          ...this.questionPopulateOption,
+          QuestionSchemaClass.submissionsJoinField,
+        ],
+        {},
+        SubmissionSchemaClass.name,
+        { userId },
+      );
+
+    const submissions = questions['submissions'];
+    return QuestionMapper.toDomainWithSubmission(questions, submissions[0]);
   }
 
   update<U extends Partial<Omit<Question, 'id'>>>(

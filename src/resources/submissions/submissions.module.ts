@@ -4,9 +4,15 @@ import { SubmissionsService } from './submissions.service';
 import { CodeExecutorModule } from 'src/infrastructure/executor/codeExecutor.module';
 import { AuthModule } from 'src/application/auth/auth.module';
 import { QuestionsModule } from '../questions/questions.module';
+import { SubmissionRepositoryModule } from './repository/submission-repository.module';
 
 @Module({
-  imports: [AuthModule, CodeExecutorModule, QuestionsModule],
+  imports: [
+    AuthModule,
+    CodeExecutorModule,
+    QuestionsModule,
+    SubmissionRepositoryModule,
+  ],
   controllers: [SubmissionsController],
   providers: [SubmissionsService],
 })

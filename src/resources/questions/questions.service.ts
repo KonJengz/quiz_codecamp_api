@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Service } from 'src/common/base-class';
-import { Question } from './domain/question.domain';
+import { Question, QuestionAndSubmission } from './domain/question.domain';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { QuestionRepository } from './repository/questions-abstract.repository';
 import { CategoriesService } from '../categories/categories.service';
 import { ErrorApiResponse } from 'src/core/error-response';
-import {
-  CodeExecutionEnum,
-  CodeExecutorService,
-} from 'src/infrastructure/executor/codeExecutor-abstract.service';
+import { CodeExecutorService } from 'src/infrastructure/executor/codeExecutor-abstract.service';
 import { Category } from '../categories/domain/categories.domain';
 import { IDValidator } from 'src/utils/IDValidatior';
+import { SubmissionStatusEnum } from '../submissions/domain/submission.domain';
+import { User } from '../users/domain/user.domain';
 
 @Injectable()
 export class QuestionsService implements Service<Question> {
@@ -47,6 +46,15 @@ export class QuestionsService implements Service<Question> {
     // Validate ID before proceed.
     IDValidator(id, 'Question');
     return this.questionRepository.findById(id);
+  }
+
+  getByIdAndMySubmission(
+    id: Question['id'],
+    userId: User['id'],
+  ): Promise<QuestionAndSubmission> {
+    IDValidator(id, 'Question');
+
+    return this.questionRepository.findByIdAndUserSubmission(id, userId);
   }
 
   async getByCategoryId(categoryId: Category['id']): Promise<Question[]> {
@@ -91,10 +99,8 @@ export class QuestionsService implements Service<Question> {
       { isFunction, variableName },
     );
 
-    console.log('Test', testResults);
-
     if (
-      testResults.status === CodeExecutionEnum.Fail ||
+      testResults.status === SubmissionStatusEnum.FAILED ||
       testResults.results.failed.length > 0
     )
       if (!testResults.isError) {

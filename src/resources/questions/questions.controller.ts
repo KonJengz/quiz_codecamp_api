@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { categoriesPath, questionsPath, userPath } from 'src/common/path';
 import { QuestionsService } from './questions.service';
 import {
@@ -17,11 +25,13 @@ import { AdminGuard } from 'src/application/auth/guard/admin.guard';
 import { ErrorApiResponse } from 'src/core/error-response';
 import {
   GetManyQuestionsResponse,
+  GetQuestionByIdAndMySubmissionReponse,
   GetQuestionByIdResponse,
   GetQuestionsByCategoryIdResponse,
 } from './dto/get-questions.dto';
 import { Category } from '../categories/domain/categories.domain';
 import { Question } from './domain/question.domain';
+import { HttpRequestWithUser } from 'src/common/types/http.type';
 
 @Controller({ version: '1', path: questionsPath.base })
 export class QuestionsController {
@@ -49,6 +59,23 @@ export class QuestionsController {
     const questions = await this.questionsService.getMany();
 
     return GetManyQuestionsResponse.getSuccess(questionsPath.base, questions);
+  }
+
+  @ApiBearerAuth()
+  @ApiParam({ name: questionsPath.paramId, required: true })
+  @UseGuards(AccessTokenAuthGuard)
+  @Get(questionsPath.idAndMe)
+  async getByIdAndMe(
+    @Param(questionsPath.paramId) id: Question['id'],
+    @Req() req: HttpRequestWithUser,
+  ): Promise<GetQuestionByIdAndMySubmissionReponse> {
+    const questionAndMySubmission =
+      await this.questionsService.getByIdAndMySubmission(id, req.user.userId);
+
+    return GetQuestionByIdAndMySubmissionReponse.getSuccess(
+      `${id}/${questionsPath.idAndMe.split('/').slice(0, 1)}`,
+      questionAndMySubmission,
+    );
   }
 
   @ApiParam({ name: questionsPath.paramId, required: true })

@@ -18,7 +18,7 @@ function seedsUser() {
   for (let i = 1; i <= 50; i++) {
     users.push({
       ...userData,
-      username: `${userData.username}_${i >= 10 ? i : `0${i}`}`,
+      username: `${userData.username}${i >= 10 ? i : `0${i}`}`,
     });
   }
 

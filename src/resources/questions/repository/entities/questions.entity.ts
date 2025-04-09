@@ -8,9 +8,6 @@ import { SubmissionSchemaClass } from 'src/resources/submissions/repository/enti
 import { TestCaseSchema } from 'src/resources/test-cases/repository/entities/test-cases.entities';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
-export const SUBMISSIONS_JOIN_CONST = 'submissions';
-export const CATEGORY_JOIN_CONST = 'category';
-
 export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
 
 @Schema({
@@ -107,11 +104,14 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   public static get testCaseJoinField(): 'testCases' {
     return 'testCases';
   }
+  public static get submissionsJoinField(): 'submissions' {
+    return 'submissions';
+  }
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(QuestionSchemaClass);
 
-QuestionSchema.virtual(SUBMISSIONS_JOIN_CONST, {
+QuestionSchema.virtual(QuestionSchemaClass.submissionsJoinField, {
   ref: SubmissionSchemaClass.name,
   localField: '_id',
   foreignField: 'questionId',

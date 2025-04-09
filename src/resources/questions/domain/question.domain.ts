@@ -2,10 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BaseDomain } from 'src/common/base-domain';
 import { Category } from 'src/resources/categories/domain/categories.domain';
 import { TestCase } from '../../test-cases/domain/test-cases.domain';
+import { Submission } from 'src/resources/submissions/domain/submission.domain';
 
 type QuestionConstructorInput = Question;
 
-class CategoryForQuestion {
+export class CategoryForQuestion {
   @ApiProperty({ type: String })
   id: Category['id'];
   @ApiProperty({ type: String })
@@ -85,4 +86,15 @@ export class ManyQuestionsDataType {
   category: CategoryForQuestion;
   @ApiProperty({ type: String })
   variableName: string;
+}
+
+export class QuestionAndSubmission extends Question {
+  @ApiProperty({ type: Submission })
+  submission: Submission;
+
+  constructor(input: QuestionAndSubmission) {
+    const { submission, ...rest } = input;
+    super(rest);
+    this.submission = submission;
+  }
 }

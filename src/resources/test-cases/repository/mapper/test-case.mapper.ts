@@ -1,14 +1,13 @@
+import { Types } from 'mongoose';
 import { TestCase } from '../../domain/test-cases.domain';
-import { TestCaseSchemaClass } from '../entities/test-cases.entities';
+
+type TestCaseDocument = Omit<TestCase, 'id'> & { _id: Types.ObjectId };
 
 export class TestCaseMapper {
-  public static toDomain(documentEntity: TestCaseSchemaClass) {
+  public static toDomain(documentEntity: TestCaseDocument) {
     if (!documentEntity) return null;
 
-    let { id, _id, ...rest } = documentEntity;
-
-    if (!id) id = _id.toString();
-
-    return new TestCase({ id, ...rest });
+    let { _id, ...rest } = documentEntity;
+    return new TestCase({ id: _id.toString(), ...rest });
   }
 }

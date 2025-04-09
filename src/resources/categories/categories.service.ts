@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CategoriesRepository } from './repository/categories-abstract.repository';
 import { Service } from 'src/common/base-class';
 import { Category, MyCategory } from './domain/categories.domain';
