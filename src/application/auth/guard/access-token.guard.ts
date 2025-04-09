@@ -13,7 +13,10 @@ import { AllConfigEnum } from 'src/config/types/all-config.type';
 import { AuthConfig } from 'src/config/types/auth-config.type';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { RoleEnum } from 'src/resources/users/domain/user.domain';
+<<<<<<< HEAD
 import { UsersService } from 'src/resources/users/users.service';
+=======
+>>>>>>> 8aeb684cc11fd6fb05eea75f4a1b675bb6713cf3
 import { AuthService } from '../auth.service';
 
 @Injectable()

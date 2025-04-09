@@ -72,7 +72,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
       const context = await isolate.createContext();
       const jail = context.global;
 
-      // await jail.set('console', {}, { copy: true });
+      await jail.set('console', {}, { copy: true });
       const func = this.generateConsole({
         debug: config.debug,
         logs: allLogs,
