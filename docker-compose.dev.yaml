@@ -35,9 +35,7 @@ services:
   # App services
   app:
     container_name: ${APP_NAME:-quiz_code_camp_api}
-    build:
-      context: ./
-      dockerfile: Dockerfile.dev
+    image: tanakorn12/quiz_codecamp:latest
     env_file:
       - env.example.dev
     ports:

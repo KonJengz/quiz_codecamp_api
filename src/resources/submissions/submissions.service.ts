@@ -34,6 +34,8 @@ export class SubmissionsService extends Service<Submission> {
   private executeCode() {}
 
   override async create(data: CreateSubmissionInput): Promise<Submission> {
+    const isFunc = this.codeExecutorService.validateFunctionSyntax(data.code);
+
     const isQuestionsExist = await this.questionsService.getById(
       data.questionId,
     );
@@ -46,7 +48,7 @@ export class SubmissionsService extends Service<Submission> {
         `The question ID: ${isQuestionsExist} does not have any test case. Please contact developer to adding test case before submitting.`,
       );
 
-      this.questionsService
+    this.questionsService;
     const resultObj = await this.runUserCodeWithTest(data.code);
 
     console.log(resultObj);

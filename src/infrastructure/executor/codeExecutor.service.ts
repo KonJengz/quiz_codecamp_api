@@ -406,7 +406,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
     return { errMsg: null, isValid: true };
   }
 
-  private validateFunctionSyntax(code: string) {
+  public validateFunctionSyntax(code: string): boolean {
     return this.arrowFnRegex.test(code) || this.functionRegex.test(code);
   }
 
