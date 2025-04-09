@@ -1,9 +1,15 @@
-import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
+import {
+  CategorySchema,
+  CategorySchemaClass,
+} from 'src/resources/categories/repository/entities/category.entity';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
+import { TestCaseSchema } from 'src/resources/test-cases/repository/entities/test-cases.entities';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 export const SUBMISSIONS_JOIN_CONST = 'submissions';
+export const CATEGORY_JOIN_CONST = 'category';
 
 export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
 
@@ -16,10 +22,10 @@ export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
 })
 export class TestCaseSchemaClass extends EntityDocumentHelper {
   @Prop({
-    type: String,
+    type: [String],
     required: true,
   })
-  input: string;
+  input: string[];
   @Prop({
     type: String,
     required: true,
@@ -81,12 +87,26 @@ export class QuestionSchemaClass extends EntityDocumentHelper {
   variableName: string;
 
   @Prop({
-    type: [
-      { type: mongoose.Schema.Types.ObjectId, ref: 'TestCaseSchemaClass' },
-    ],
+    type: Boolean,
+    required: true,
+  })
+  isFunction: boolean;
+
+  @Prop({
+    type: [TestCaseSchema],
     default: [],
   })
-  testCases: Types.ObjectId[];
+  testCases: TestCaseSchemaClass[];
+
+  @Prop({ type: Date, required: false, default: null })
+  deletedAt?: Date;
+
+  public static get categoryJoinField(): 'category' {
+    return 'category';
+  }
+  public static get testCaseJoinField(): 'testCases' {
+    return 'testCases';
+  }
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(QuestionSchemaClass);
@@ -95,4 +115,10 @@ QuestionSchema.virtual(SUBMISSIONS_JOIN_CONST, {
   ref: SubmissionSchemaClass.name,
   localField: '_id',
   foreignField: 'questionId',
+});
+
+QuestionSchema.virtual(QuestionSchemaClass.categoryJoinField, {
+  ref: CategorySchemaClass.name,
+  localField: 'categoryId',
+  foreignField: '_id',
 });

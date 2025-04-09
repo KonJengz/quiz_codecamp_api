@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseDomain } from 'src/common/base-domain';
 import { Category } from 'src/resources/categories/domain/categories.domain';
-import { TestCase } from './testCase.domain';
+import { TestCase } from '../../test-cases/domain/test-cases.domain';
 
 type QuestionConstructorInput = Question;
 
@@ -12,6 +12,20 @@ class CategoryForQuestion {
   name: Category['name'];
   @ApiProperty({ type: Boolean })
   isChallenge: Category['isChallenge'];
+
+  constructor({
+    id,
+    name,
+    isChallenge,
+  }: {
+    id: CategoryForQuestion['id'];
+    name: CategoryForQuestion['name'];
+    isChallenge: CategoryForQuestion['isChallenge'];
+  }) {
+    this.id = id;
+    this.name = name;
+    this.isChallenge = isChallenge;
+  }
 }
 
 export class Question extends BaseDomain {
@@ -42,6 +56,7 @@ export class Question extends BaseDomain {
       title,
       variableName,
       updatedAt,
+      testCases,
       deletedAt,
     } = input;
 
@@ -53,5 +68,21 @@ export class Question extends BaseDomain {
     this.solution = solution;
     this.starterCode = starterCode;
     this.category = category;
+    this.testCases = testCases;
   }
+}
+
+export class ManyQuestionsDataType {
+  @ApiProperty({ type: String })
+  title: string;
+  @ApiProperty({ type: String })
+  description: string;
+  @ApiProperty({ type: String })
+  starterCode: string;
+  @ApiProperty({ type: String })
+  solution: string;
+  @ApiProperty({ type: CategoryForQuestion })
+  category: CategoryForQuestion;
+  @ApiProperty({ type: String })
+  variableName: string;
 }
