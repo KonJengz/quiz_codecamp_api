@@ -15,5 +15,6 @@ import { CodeExecutorModule } from 'src/infrastructure/executor/codeExecutor.mod
   ],
   controllers: [QuestionsController],
   providers: [QuestionsService],
+  exports: [QuestionsService],
 })
 export class QuestionsModule {}

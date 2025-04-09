@@ -7,6 +7,7 @@ import {
   SubmittedCodeResult,
   TestedCodeResults,
   ValidateCodeInput,
+  ValidateCodeOutput,
 } from './codeExecutor-abstract.service';
 import * as ivm from 'isolated-vm';
 import { ErrorApiResponse } from 'src/core/error-response';
@@ -49,6 +50,9 @@ export type ResultsFromExecuted = {
 
 export class IVMCodeExecutor implements CodeExecutorService {
   private readonly logger: Logger = new Logger(IVMCodeExecutor.name);
+
+  private arrowFnRegex = new RegExp(/\=\s*\(\s*\)\s*=>/);
+  private functionRegex = new RegExp(/function\s+(\w+\s*)?\(/);
 
   private ivmConfig = {
     memoryLimit: 8,
@@ -380,31 +384,28 @@ export class IVMCodeExecutor implements CodeExecutorService {
     }));
   }
 
-  public validateCode(input: ValidateCodeInput): Promise<boolean> {
-    const { starterCode, solution, testVariable, testCases } = data;
-    const { isFunction, variableName } = testVariable;
+  public validateCode(input: ValidateCodeInput): ValidateCodeOutput {
+    const { codes, detail } = input;
+    const { isFunction, variableName } = detail;
 
-    if (!starterCode.includes(variableName))
-      throw ErrorApiResponse.badRequest(
-        `The variable name: ${variableName} is not exists in startercode`,
-      );
-
-    if (!solution.includes(variableName))
-      throw ErrorApiResponse.badRequest(
-        `The variable name: ${variableName} is not exist in solution`,
-      );
+    if (!codes.every((code) => code.includes(variableName)))
+      return {
+        isValid: false,
+        errMsg: `The provided code for checking does not have variable name: ${variableName}`,
+      };
 
     if (isFunction) {
-      const isTestVariableAFn = [starterCode, solution].every((code) =>
-        this.validateFunctionSyntax(code),
-      );
-
-      if (!isTestVariableAFn)
-        throw ErrorApiResponse.badRequest(
-          `Provided question as function but the solution does not contain any function syntax.`,
-        );
+      const isFn = codes.every((code) => this.validateFunctionSyntax(code));
+      if (!isFn)
+        return {
+          errMsg:
+            'Provided type of code as a function but the function itself does not have any function syntax. Please try again',
+          isValid: false,
+        };
     }
+    return { errMsg: null, isValid: true };
   }
+
   private validateFunctionSyntax(code: string) {
     return this.arrowFnRegex.test(code) || this.functionRegex.test(code);
   }

@@ -20,9 +20,6 @@ export class QuestionsService implements Service<Question> {
     private readonly codeExecutionService: CodeExecutorService,
   ) {}
 
-  private arrowFnRegex = new RegExp(/\=\s*\(\s*\)\s*=>/);
-  private functionRegex = new RegExp(/function\s+(\w+\s*)?\(/);
-
   async create(data: CreateQuestionDto): Promise<Question> {
     const isCategoryExist = await this.categoriesService.getById(
       data.categoryId,
@@ -77,26 +74,15 @@ export class QuestionsService implements Service<Question> {
     const { starterCode, solution, testVariable, testCases } = data;
     const { isFunction, variableName } = testVariable;
 
-    if (!starterCode.includes(variableName))
-      throw ErrorApiResponse.badRequest(
-        `The variable name: ${variableName} is not exists in startercode`,
-      );
+    const { errMsg, isValid } = this.codeExecutionService.validateCode({
+      codes: [starterCode, solution],
+      detail: {
+        isFunction,
+        variableName,
+      },
+    });
 
-    if (!solution.includes(variableName))
-      throw ErrorApiResponse.badRequest(
-        `The variable name: ${variableName} is not exist in solution`,
-      );
-
-    if (isFunction) {
-      const isTestVariableAFn = [starterCode, solution].every((code) =>
-        this.validateFunctionSyntax(code),
-      );
-
-      if (!isTestVariableAFn)
-        throw ErrorApiResponse.badRequest(
-          `Provided question as function but the solution does not contain any function syntax.`,
-        );
-    }
+    if (!isValid) throw ErrorApiResponse.badRequest(errMsg);
 
     const genTestCase = this.codeExecutionService.generateTestCase(testCases);
     const testResults = await this.codeExecutionService.submit(
@@ -122,9 +108,5 @@ export class QuestionsService implements Service<Question> {
       }
 
     return;
-  }
-
-  private validateFunctionSyntax(code: string) {
-    return this.arrowFnRegex.test(code) || this.functionRegex.test(code);
   }
 }

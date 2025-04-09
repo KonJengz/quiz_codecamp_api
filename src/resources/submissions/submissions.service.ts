@@ -46,6 +46,7 @@ export class SubmissionsService extends Service<Submission> {
         `The question ID: ${isQuestionsExist} does not have any test case. Please contact developer to adding test case before submitting.`,
       );
 
+      this.questionsService
     const resultObj = await this.runUserCodeWithTest(data.code);
 
     console.log(resultObj);

@@ -13,7 +13,6 @@ export class QuestionMapper {
     allFields: boolean = false,
   ): Question {
     if (!documentEntity) return null;
-    console.log('Question mapper: ', documentEntity);
 
     const {
       id,

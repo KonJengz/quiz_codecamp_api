@@ -1,3 +1,4 @@
+import { NullAble } from 'src/common/types/types';
 import { ITestCase } from './codeExecutor.service';
 import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
 
@@ -50,8 +51,13 @@ export type TestVarialbeQuestionDetail = {
 };
 
 export type ValidateCodeInput = {
-  code: string;
+  codes: string[];
   detail: TestVarialbeQuestionDetail;
+};
+
+export type ValidateCodeOutput = {
+  isValid: boolean;
+  errMsg: NullAble<string>;
 };
 
 export abstract class CodeExecutorService {
@@ -68,7 +74,7 @@ export abstract class CodeExecutorService {
     testCases: CreateQuestionDto['testCases'],
   ): ITestCase[];
 
-  public abstract validateCode(input: ValidateCodeInput): Promise<boolean>;
+  public abstract validateCode(input: ValidateCodeInput): ValidateCodeOutput;
 
   // public abstract parseInputToOriginalValue(
   //   input: ITestCase['input'],

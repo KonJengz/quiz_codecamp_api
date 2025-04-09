@@ -73,6 +73,8 @@ async function bootstrap() {
     ),
   );
 
-  await app.listen(PORT, () => Logger.log(`Server is starting on ${host}`));
+  await app.listen(PORT, () =>
+    Logger.log(`Server is starting on ${host}:${PORT}`),
+  );
 }
 bootstrap();
