@@ -53,8 +53,6 @@ export class UsersService extends Service<User> implements OnModuleInit {
     return isUserExist;
   }
 
-  public async getMe() {}
-
   getMany(): Promise<User[]> {
     return this.userRepository.findMany();
   }

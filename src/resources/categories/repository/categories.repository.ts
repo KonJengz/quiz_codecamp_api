@@ -1,4 +1,4 @@
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { Category, MyCategory } from '../domain/categories.domain';
 import { CategoriesRepository } from './categories-abstract.repository';
 import { CategorySchemaClass } from './entities/category.entity';
@@ -8,6 +8,11 @@ import { CategoryMapper } from './mapper/category.mapper';
 import { User } from 'src/resources/users/domain/user.domain';
 import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
 import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
+import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
+
+export type MyCategoryQueried = CategorySchemaClass & {
+  solvedQuestions: Types.ObjectId[];
+};
 
 @Injectable()
 export class CategoriesDocumentRepository implements CategoriesRepository {
@@ -25,6 +30,7 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
 
   async findById(id: Category['id']): Promise<Category> {
     const categoryObj = await this.categoryModel.findById(id);
+
     return CategoryMapper.toDomain(categoryObj);
   }
 
@@ -39,24 +45,82 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
   async findMany(): Promise<Category[]> {
     const categoryObj = await this.categoryModel.find();
     // .populate(CategorySchemaClass.questionsPopulatePath);
-    console.log(categoryObj);
     return categoryObj.map(CategoryMapper.toDomain);
   }
 
   async findMyCategories(userId: User['id']): Promise<MyCategory[]> {
-    const myCategories = await this.categoryModel
-      .find()
-      .populate({
-        path: 'questions',
-        populate: {
-          path: QuestionSchemaClass.submissionsJoinField,
-          match: {
-            userId: new mongoose.Types.ObjectId(userId),
-            status: SubmissionStatusEnum.PASSED,
+    const myCategories: MyCategoryQueried[] =
+      await this.categoryModel.aggregate([
+        // Lookup questions for each category
+        {
+          $lookup: {
+            from: QuestionSchemaClass.actualCollectionName,
+            localField: '_id',
+            foreignField: 'categoryId',
+            as: 'questions',
           },
         },
-      })
-      .exec();
+        // Unwind each question to operate on each individually
+        {
+          $unwind: {
+            path: '$questions',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        // Lookup submissions from each question (using corrected field reference)
+        {
+          $lookup: {
+            from: SubmissionSchemaClass.actualCollectionName,
+            let: { questionId: '$questions._id' },
+            pipeline: [
+              {
+                // Match the questionId, userId and PASSED status
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$questionId', '$$questionId'] },
+                      { $eq: ['$userId', new mongoose.Types.ObjectId(userId)] },
+                      { $eq: ['$status', SubmissionStatusEnum.PASSED] },
+                    ],
+                  },
+                },
+              },
+              // Only grab the id of document
+              { $project: { _id: 1 } },
+            ],
+            as: 'submissions',
+          },
+        },
+        // Group back the questions by category to reassemble the data structure
+        {
+          $group: {
+            _id: '$_id',
+            name: { $first: '$name' },
+            isChallenge: { $first: '$isChallenge' },
+            deletedAt: { $first: '$deletedAt' },
+            createdAt: { $first: '$createdAt' },
+            updatedAt: { $first: '$updatedAt' },
+            __v: { $first: '$__v' },
+            // Collect only the question ID
+            questions: {
+              $push: '$questions._id',
+            },
+            // Count only those questions with at least one matching submission
+            solvedQuestions: {
+              $push: {
+                $cond: [
+                  {
+                    $gt: [{ $size: '$submissions' }, 0],
+                  },
+                  '$questions._id',
+                  '$$REMOVE',
+                ],
+              },
+            },
+          },
+        },
+      ]);
+
     return myCategories.map(CategoryMapper.toMyCategoryDomain);
   }
 

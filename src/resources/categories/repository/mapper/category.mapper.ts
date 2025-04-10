@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Category, MyCategory } from '../../domain/categories.domain';
 import { CategorySchemaClass } from '../entities/category.entity';
+import { MyCategoryQueried } from '../categories.repository';
 
 export class CategoryMapper {
   public static toDomain(documentEntity: CategorySchemaClass): Category {
@@ -17,8 +18,21 @@ export class CategoryMapper {
   }
 
   public static toMyCategoryDomain(
-    documentEntity: CategorySchemaClass,
+    documentEntity: MyCategoryQueried,
   ): MyCategory {
-    return new MyCategory(documentEntity.toObject());
+    const {
+      _id,
+      questions: qBuffer,
+      solvedQuestions: sQBuffer,
+      ...rest
+    } = documentEntity;
+    const questions = qBuffer.map((buffer) => buffer.toString());
+    const solvedQuestions = sQBuffer.map((buffer) => buffer.toString());
+    return new MyCategory({
+      ...rest,
+      id: _id.toString(),
+      questions,
+      solvedQuestions,
+    });
   }
 }

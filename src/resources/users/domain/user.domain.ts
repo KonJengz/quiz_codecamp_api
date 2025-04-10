@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { isNumber } from 'class-validator';
 import { BaseDomain } from 'src/common/base-domain';
 
@@ -15,7 +15,7 @@ export class User extends BaseDomain {
   @ApiProperty({ type: String })
   username: string;
 
-  @Expose({ toClassOnly: true })
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @ApiProperty({ enum: RoleEnum, type: String })

@@ -32,7 +32,7 @@ export class CategorySchemaClass extends EntityDocumentHelper {
     ],
     default: [],
   })
-  questions: Types.ObjectId;
+  questions: Types.ObjectId[];
 
   @Prop({ type: Date, required: false, default: null })
   deletedAt?: Date;

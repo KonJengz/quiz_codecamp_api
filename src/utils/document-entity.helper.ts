@@ -14,4 +14,16 @@ export class EntityDocumentHelper extends Document {
     { toPlainOnly: true },
   )
   _id: string;
+
+  public static get actualCollectionName(): string {
+    const lowerClassName = this.name.toLowerCase();
+    const name =
+      this.name[this.name.length - 1] === 's'
+        ? `${lowerClassName}es`
+        : `${lowerClassName}s`;
+    return name;
+  }
+
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -10,7 +10,7 @@ export class Category extends BaseDomain {
   @ApiProperty({ type: Boolean, example: 'false' })
   isChallenge: boolean;
 
-  @ApiProperty({ type: [String], example: [1, 2, 3] })
+  @ApiProperty({ type: [String], example: [''] })
   questions: Question['id'][];
 
   constructor({
