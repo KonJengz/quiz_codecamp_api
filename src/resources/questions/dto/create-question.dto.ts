@@ -32,7 +32,7 @@ class TestVariable {
   @IsString()
   variableName: Question['variableName'];
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: Boolean })
   @IsBoolean()
   isFunction: boolean;
 }

@@ -44,6 +44,7 @@ export class UsersService extends Service<User> implements OnModuleInit {
 
     return this.userRepository.create(data);
   }
+
   async getById(id: User['id']): Promise<User> {
     const isUserExist = await this.userRepository.findById(id);
 
@@ -51,6 +52,9 @@ export class UsersService extends Service<User> implements OnModuleInit {
 
     return isUserExist;
   }
+
+  public async getMe() {}
+
   getMany(): Promise<User[]> {
     return this.userRepository.findMany();
   }
