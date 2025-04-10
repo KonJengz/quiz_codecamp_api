@@ -36,6 +36,7 @@ services:
   app:
     container_name: ${APP_NAME:-quiz_code_camp_api}
     image: tanakorn12/quiz_codecamp:latest
+    platform: linux/amd64
     env_file:
       - env.example.dev
     ports:
