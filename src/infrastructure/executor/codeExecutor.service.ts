@@ -1,6 +1,5 @@
 import { Logger } from '@nestjs/common';
 import {
-  CodeExecutionEnum,
   CodeExecutionOptions,
   CodeExecutionResult,
   CodeExecutorService,
@@ -12,6 +11,7 @@ import {
 import * as ivm from 'isolated-vm';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
+import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
 
 export enum TestCaseMatcherEnum {
   toBe = 'toBe',
@@ -140,7 +140,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
   ): Promise<SubmittedCodeResult> {
     let isolate: ivm.Isolate;
     let results: TestedCodeResults;
-    let status: CodeExecutionEnum;
+    let status: SubmissionStatusEnum;
     const { isFunction, variableName } = questionDetails;
     try {
       const { context } = await this.sandbox(options);
@@ -154,7 +154,9 @@ export class IVMCodeExecutor implements CodeExecutorService {
             fnName: variableName,
           });
         results = testResult;
-        status = passed ? CodeExecutionEnum.Success : CodeExecutionEnum.Fail;
+        status = passed
+          ? SubmissionStatusEnum.PASSED
+          : SubmissionStatusEnum.FAILED;
       } else {
         const { passed, results: testResult } =
           await this.executeNonFnCodeWithTest({
@@ -163,7 +165,9 @@ export class IVMCodeExecutor implements CodeExecutorService {
             testCases,
           });
         results = testResult;
-        status = passed ? CodeExecutionEnum.Success : CodeExecutionEnum.Fail;
+        status = passed
+          ? SubmissionStatusEnum.PASSED
+          : SubmissionStatusEnum.FAILED;
       }
 
       if (!results)
@@ -186,7 +190,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
         isError: true,
         logs: [],
         status,
-        results: { passed: 0, failed: [], total: testCases.length },
+        results: { passed: [], failed: [], total: testCases.length },
       };
     } finally {
       if (isolate) isolate.dispose();
@@ -197,11 +201,6 @@ export class IVMCodeExecutor implements CodeExecutorService {
     testResults: TestResultType,
     numOrder: number,
   ): TestedCodeResults['failed'][number] {
-    if (testResults.passed)
-      throw ErrorApiResponse.internalServerError(
-        'There is an internal server error while resolving test case.',
-      );
-
     return {
       actual: testResults.detail.actual,
       expected: testResults.detail.expected,
@@ -222,7 +221,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
   }): Promise<ResultsFromExecuted> {
     const results: TestedCodeResults = {
       failed: [],
-      passed: 0,
+      passed: [],
       total: testCases.length,
     };
 
@@ -247,15 +246,18 @@ export class IVMCodeExecutor implements CodeExecutorService {
             timeout: this.ivmConfig.timeout,
           });
           const parsedTestResult: TestResultType = JSON.parse(testResult);
+          const testResultDetail = this.resolveTestResult(
+            parsedTestResult,
+            numOrder,
+          );
           if (!parsedTestResult.passed) {
-            results.failed.push(
-              this.resolveTestResult(parsedTestResult, numOrder),
-            );
+            results.failed.push(testResultDetail);
             passed = false;
             continue;
           }
-          ++results.passed;
+          results.passed.push(testResultDetail);
         } catch (err) {
+          this.logger.error(err?.stack);
           results.failed.push({
             actual: '',
             expected: '',
@@ -281,7 +283,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
   }): Promise<ResultsFromExecuted> {
     const results: TestedCodeResults = {
       failed: [],
-      passed: 0,
+      passed: [],
       total: testCases.length,
     };
 
@@ -300,14 +302,15 @@ export class IVMCodeExecutor implements CodeExecutorService {
             timeout: this.ivmConfig.timeout,
           });
 
+          const testResultDetail = this.resolveTestResult(testResult, numOrder);
           if (!testResult.passed) {
-            results.failed.push(this.resolveTestResult(testResult, numOrder));
+            results.failed.push(testResultDetail);
             passed = false;
             continue;
           }
-
-          ++results.passed;
+          results.passed.push(testResultDetail);
         } catch (err) {
+          this.logger.error(err?.message);
           passed = false;
           results.failed.push({
             actual: '',

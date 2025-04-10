@@ -6,14 +6,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { CategoryMapper } from './mapper/category.mapper';
 import { User } from 'src/resources/users/domain/user.domain';
-import {
-  QuestionSchemaClass,
-  SUBMISSIONS_JOIN_CONST,
-} from 'src/resources/questions/repository/entities/questions.entity';
-import {
-  SubmissionSchemaClass,
-  SubmissionStatusEnum,
-} from 'src/resources/submissions/repository/entities/submissions.entity';
+import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
+import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
 
 @Injectable()
 export class CategoriesDocumentRepository implements CategoriesRepository {
@@ -55,10 +49,10 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
       .populate({
         path: 'questions',
         populate: {
-          path: SUBMISSIONS_JOIN_CONST,
+          path: QuestionSchemaClass.submissionsJoinField,
           match: {
             userId: new mongoose.Types.ObjectId(userId),
-            status: SubmissionStatusEnum.Accepted,
+            status: SubmissionStatusEnum.PASSED,
           },
         },
       })

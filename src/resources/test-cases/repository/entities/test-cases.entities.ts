@@ -1,9 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SchemaType, SchemaTypes, Types } from 'mongoose';
+import { SchemaTypes } from 'mongoose';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
 
 @Schema({
-  timestamps: true,
   toJSON: {
     virtuals: true,
     getters: true,

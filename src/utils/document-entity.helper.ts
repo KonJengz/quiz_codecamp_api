@@ -1,7 +1,8 @@
-import { Prop } from '@nestjs/mongoose';
+import { Schema } from '@nestjs/mongoose';
 import { Transform } from 'class-transformer';
 import { Document } from 'mongoose';
 
+@Schema()
 export class EntityDocumentHelper extends Document {
   @Transform(
     (value) => {
@@ -13,10 +14,4 @@ export class EntityDocumentHelper extends Document {
     { toPlainOnly: true },
   )
   _id: string;
-
-  @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
-
-  @Prop({ type: Date, default: Date.now })
-  updatedAt: Date;
 }

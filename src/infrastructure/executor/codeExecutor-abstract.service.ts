@@ -1,11 +1,9 @@
+import { Type } from '@nestjs/common';
 import { NullAble } from 'src/common/types/types';
 import { ITestCase } from './codeExecutor.service';
-import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
-
-export enum CodeExecutionEnum {
-  Success = 'SUCCESS',
-  Fail = 'Fail',
-}
+import { TestCase } from 'src/resources/test-cases/domain/test-cases.domain';
+import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
+import { ApiProperty } from '@nestjs/swagger';
 
 export type CodeExecutionOptions = {
   timeout?: number;
@@ -15,13 +13,13 @@ export type CodeExecutionOptions = {
 };
 
 export type TestedCodeResults = {
-  passed: number;
+  passed: TestResultType['detail'][];
   failed: TestResultType['detail'][];
   total: number;
 };
 
 export type SubmittedCodeResult = {
-  status: CodeExecutionEnum;
+  status: SubmissionStatusEnum;
   isError: boolean;
   errMsg: string;
   logs: string[];
@@ -34,14 +32,19 @@ export type CodeExecutionResult = {
   logs: string[];
 };
 
+export class TestResultDetail {
+  @ApiProperty({ examples: [[1, 5], 'string', { name: 'John' }] })
+  actual: any;
+  @ApiProperty({ examples: ['Hello world', 1, { age: 18 }] })
+  expected: any;
+  @ApiProperty({ type: Number })
+  testCase: number;
+  error?: string;
+}
+
 export type TestResultType = {
   passed: boolean;
-  detail: {
-    actual: unknown;
-    expected: unknown;
-    testCase: number;
-    error?: string;
-  };
+  detail: TestResultDetail;
   error: string;
 };
 
@@ -70,9 +73,7 @@ export abstract class CodeExecutorService {
     options?: CodeExecutionOptions,
   ): Promise<SubmittedCodeResult>;
 
-  public abstract generateTestCase(
-    testCases: CreateQuestionDto['testCases'],
-  ): ITestCase[];
+  public abstract generateTestCase(testCases: TestCase[]): ITestCase[];
 
   public abstract validateCode(input: ValidateCodeInput): ValidateCodeOutput;
 

@@ -5,6 +5,7 @@ const QUESTIONS_PATH = 'questions';
 const SUBMISSIONS_PATH = 'submissions';
 const HEALTH_PATH = 'healthcheck';
 const EXECUTE_PATH = 'executes';
+const ME = 'me';
 
 export const authPath = {
   base: AUTH_PATH,
@@ -21,12 +22,13 @@ export const userPath = {
 
 export const categoriesPath = {
   base: CATEGORIES_PATH,
-  me: 'me',
+  me: ME,
   paramId: 'categoryId',
 };
 
 export const questionsPath = {
   base: QUESTIONS_PATH,
+  idAndMe: `:questionId/${SUBMISSIONS_PATH}/${ME}`,
   getById: ':questionId',
   paramId: 'questionId',
   category: `${categoriesPath.base}/:${categoriesPath.paramId}`,
