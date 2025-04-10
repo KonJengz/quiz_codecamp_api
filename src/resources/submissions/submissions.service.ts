@@ -155,8 +155,8 @@ export class SubmissionsService extends Service<Submission> {
     const numFailedCases: number = testResults.failed.length;
 
     if (
-      status === SubmissionStatusEnum.PASSED ||
-      testResults.passed.length !== testResults.total
+      status === SubmissionStatusEnum.PASSED &&
+      testResults.passed.length === testResults.total
     ) {
       if (numFailedCases > 0)
         throw ErrorApiResponse.internalServerError(

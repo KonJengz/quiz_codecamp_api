@@ -15,7 +15,6 @@ export class User extends BaseDomain {
   @ApiProperty({ type: String })
   username: string;
 
-  @ApiProperty({ type: String })
   @Expose({ toClassOnly: true })
   password: string;
 

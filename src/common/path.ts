@@ -18,6 +18,7 @@ export const healthCheckPath = {
 
 export const userPath = {
   base: USER_PATH,
+  me: ME,
 };
 
 export const categoriesPath = {
