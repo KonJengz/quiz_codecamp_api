@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, UpdateQuery } from 'mongoose';
 import { User } from '../domain/user.domain';
 import { UserRepository } from './user-abstract.repository';
 import { InjectModel } from '@nestjs/mongoose';
@@ -51,6 +51,17 @@ export class UserDocumentRepository implements UserRepository {
     });
 
     return UserMapper.toDomain(userObj);
+  }
+
+  async updateSolvedRecord(
+    isChallenge: boolean,
+    id: User['id'],
+  ): Promise<User> {
+    const solved: UpdateQuery<UserSchemaClass> = isChallenge
+      ? { $inc: { totalSolvedChallenges: 1 } }
+      : { $inc: { totalSolvedQuizzes: 1 } };
+    const userObjs = await this.userModel.findByIdAndUpdate(id, solved);
+    return UserMapper.toDomain(userObjs);
   }
 
   async seeds(users: CreateUserDto[]): Promise<unknown> {

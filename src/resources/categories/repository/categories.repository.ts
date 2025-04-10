@@ -21,6 +21,12 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     private readonly categoryModel: Model<CategorySchemaClass>,
   ) {}
 
+  async count(): Promise<number> {
+    return this.categoryModel.countDocuments();
+  }
+
+  async seed(): Promise<unknown> {}
+
   async create<U extends Partial<Category>>(data: U): Promise<Category> {
     const createdCategory = new this.categoryModel(data);
     const categoryObj = await createdCategory.save();
@@ -48,6 +54,14 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     return categoryObj.map(CategoryMapper.toDomain);
   }
 
+  /**
+   *
+   * Function for finding all of the categories
+   * but also provided the total solved question
+   * for the requested user.
+   * @param {User["id"]} userId
+   * @returns {MyCategory[]}
+   */
   async findMyCategories(userId: User['id']): Promise<MyCategory[]> {
     const myCategories: MyCategoryQueried[] =
       await this.categoryModel.aggregate([
@@ -135,5 +149,10 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     );
 
     return CategoryMapper.toDomain(categoryObj);
+  }
+
+  async deleteAll(): Promise<void> {
+    await this.categoryModel.deleteMany();
+    return;
   }
 }

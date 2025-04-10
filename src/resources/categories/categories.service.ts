@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CategoriesRepository } from './repository/categories-abstract.repository';
 import { Service } from 'src/common/base-class';
 import { Category, MyCategory } from './domain/categories.domain';
@@ -7,11 +7,35 @@ import { ErrorApiResponse } from 'src/core/error-response';
 import { isString } from 'class-validator';
 import { UpdateCategoryDto } from './dto/update.dto';
 import { User } from '../users/domain/user.domain';
+import seedsCategoryAndQuestions from 'src/utils/seeds/data/categories-data.seed';
 
 @Injectable()
-export class CategoriesService extends Service<Category> {
+export class CategoriesService
+  extends Service<Category>
+  implements OnModuleInit
+{
+  private logger: Logger = new Logger(CategoriesService.name);
   constructor(private readonly categoriesRepository: CategoriesRepository) {
     super();
+  }
+
+  async onModuleInit() {
+    try {
+      const count = await this.categoriesRepository.count();
+      if (count > 2) {
+        this.logger.log('Seeding skipped as there are categories data in db.');
+        return;
+      }
+
+      if (count >= 1) {
+        await this.categoriesRepository.deleteAll();
+      }
+
+      await this.categoriesRepository.seeds();
+    } catch (err) {
+      this.logger.error(err.message);
+      console.log('There is an error while seeding.');
+    }
   }
 
   async create(data: CreateCategoryDto): Promise<Category> {

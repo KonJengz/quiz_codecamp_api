@@ -6,4 +6,10 @@ export abstract class CategoriesRepository extends Repository<Category> {
   abstract findByName(name: Category['name']): Promise<Category>;
 
   abstract findMyCategories(userId: User['id']): Promise<MyCategory[]>;
+
+  abstract count(): Promise<number>;
+
+  abstract seeds(): Promise<unknown>;
+
+  abstract deleteAll(): Promise<void>;
 }

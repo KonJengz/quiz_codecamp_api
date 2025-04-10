@@ -89,4 +89,11 @@ export class UsersService extends Service<User> implements OnModuleInit {
 
     return this.userRepository.update(data, id);
   }
+
+  async updateSolvedRecord(
+    isChallenge: boolean,
+    id: User['id'],
+  ): Promise<User> {
+    return this.userRepository.updateSolvedRecord(isChallenge, id);
+  }
 }

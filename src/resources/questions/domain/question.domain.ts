@@ -42,7 +42,6 @@ export class Question extends BaseDomain {
   category: CategoryForQuestion;
   @ApiProperty({ type: String })
   variableName: string;
-
   @ApiProperty({ type: TestCase })
   testCases: TestCase[];
 
