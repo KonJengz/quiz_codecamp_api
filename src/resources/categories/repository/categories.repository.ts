@@ -3,12 +3,13 @@ import { Category, MyCategory } from '../domain/categories.domain';
 import { CategoriesRepository } from './categories-abstract.repository';
 import { CategorySchemaClass } from './entities/category.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CategoryMapper } from './mapper/category.mapper';
 import { User } from 'src/resources/users/domain/user.domain';
 import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
 import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
+import { seedsCategory } from 'src/utils/seeds/data/questions-related-data.seed';
 
 export type MyCategoryQueried = CategorySchemaClass & {
   solvedQuestions: Types.ObjectId[];
@@ -16,6 +17,7 @@ export type MyCategoryQueried = CategorySchemaClass & {
 
 @Injectable()
 export class CategoriesDocumentRepository implements CategoriesRepository {
+  private logger: Logger = new Logger(CategoriesDocumentRepository.name);
   constructor(
     @InjectModel(CategorySchemaClass.name)
     private readonly categoryModel: Model<CategorySchemaClass>,
@@ -25,7 +27,12 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     return this.categoryModel.countDocuments();
   }
 
-  async seed(): Promise<unknown> {}
+  async seeds(): Promise<unknown> {
+    this.logger.log('Start seeding...');
+    this.logger.log('Seeding categories finished!');
+    await this.categoryModel.create(seedsCategory());
+    return;
+  }
 
   async create<U extends Partial<Category>>(data: U): Promise<Category> {
     const createdCategory = new this.categoryModel(data);

@@ -12,9 +12,11 @@ import * as ivm from 'isolated-vm';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
 import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
+import { CodeAssertionService } from './assertion.service';
 
 export enum TestCaseMatcherEnum {
   toBe = 'toBe',
+  toBeDeepEqual = 'toBeDeepEqual',
 }
 
 type TestResultType = {
@@ -143,8 +145,8 @@ export class IVMCodeExecutor implements CodeExecutorService {
     let status: SubmissionStatusEnum;
     const { isFunction, variableName } = questionDetails;
     try {
-      const { context } = await this.sandbox(options);
-
+      const { context, isolate: ivmIsolate } = await this.sandbox(options);
+      isolate = ivmIsolate;
       if (isFunction) {
         const { passed, results: testResult } =
           await this.executeFnCodeWithTest({
@@ -229,19 +231,38 @@ export class IVMCodeExecutor implements CodeExecutorService {
 
     if (testCases.length > 0) {
       for (const [index, testCase] of testCases.entries()) {
+        // Track the test case number
         const numOrder = index + 1;
         try {
+          // Check the test case first
           if (!(testCase.input && testCase.expected))
             throw ErrorApiResponse.internalServerError(
               `The test case does not provide input or output. Please try again.`,
             );
 
-          // const inputs = this.parseInputToOriginalValue(testCase.input).join(
-          //   ', ',
+          // const result = await context.evalClosure(
+          //   `return ${fnName}(${testCase.input.join(',')})`,
+          //   [],
+          //   { arguments: { copy: true }, result: { copy: true } },
           // );
-          const invokedCode = `${code} \n ${fnName}(${testCase.input.join(',')})`;
-          const result = await context.eval(invokedCode);
+
+          // Invoked function with the input of the test case
+          // and return the value back.
+          const result = await context.eval(
+            this.invokedFuncAndReturn(
+              code,
+              `${fnName}(${testCase.input.join(',')})`,
+            ),
+          );
+
+          if (!result)
+            throw new Error(
+              `The results is ${result} and cannot proceed to test process.`,
+            );
+
+          // generate the assertion framework and code for testing the result
           const assertionCode = this.generateAssertionCode(testCase, result);
+          // Run the assertion test.
           const testResult = await context.eval(assertionCode, {
             timeout: this.ivmConfig.timeout,
           });
@@ -325,32 +346,9 @@ export class IVMCodeExecutor implements CodeExecutorService {
     return { results, passed };
   }
 
-  private assertionFramework: string = `
-  function expect(actual) {
-    return {
-      ${TestCaseMatcherEnum.toBe}: (expected) => {
-        const passed = actual === expected;
-        const result = {
-          passed, 
-          detail : {
-            actual,
-            expected
-          },
-          error: ""
-        }
-        if (!passed) {
-         result.error = \`Expected \${JSON.stringify(actual)} to be \${JSON.stringify(expected)}\` 
-        }
-        return result;
-      },
-    };
-  }
-  `;
-
   private generateAssertionCode(testCase: ITestCase, result?: unknown): string {
-    const assertionFrameWork = this.assertionFramework;
-
     let expectToTest: unknown;
+
     if (result) {
       expectToTest = result;
     } else if (testCase.expect) {
@@ -364,27 +362,44 @@ export class IVMCodeExecutor implements CodeExecutorService {
         `No input for test. Please try again.`,
       );
 
-    let assertionCode = `expect(${expectToTest}).${testCase.matcher}(${testCase.expected})`;
+    let assertionCode = CodeAssertionService.generateAssertionCode(
+      testCase,
+      expectToTest,
+    );
 
+    return this.invokedFuncAndReturn(
+      CodeAssertionService.setupAssertionFramework(TestCaseMatcherEnum),
+      assertionCode,
+    );
+  }
+
+  private invokedFuncAndReturn(baseCode: string, invokedCode: string) {
     return `
     (() => {
-    ${assertionFrameWork}
-    
-    const __result__ = ${assertionCode};
-    
-   return JSON.stringify(__result__)
+    ${baseCode}
+
+    const __result__ = ${invokedCode}
+
+    return JSON.stringify(__result__)
     })()
-  `;
+    `;
   }
 
   public generateTestCase(
     testCases: CreateQuestionDto['testCases'],
   ): ITestCase[] {
-    return testCases.map(({ input, output }) => ({
-      expected: output,
-      matcher: TestCaseMatcherEnum.toBe,
-      input: input,
-    }));
+    return testCases.map(({ input, output }) => {
+      let matcher = TestCaseMatcherEnum.toBe;
+
+      if (typeof output === 'object')
+        matcher = TestCaseMatcherEnum.toBeDeepEqual;
+
+      return {
+        expected: output,
+        matcher,
+        input: input,
+      };
+    });
   }
 
   public validateCode(input: ValidateCodeInput): ValidateCodeOutput {

@@ -36,8 +36,9 @@ export class QuestionsService implements Service<Question> {
         `The question name: ${isQuestionDuped.title} is already exist. Please try again with new question name.`,
       );
 
-    // Validate the question
-    this.validateQuestionCode(data);
+    // Validate the question code
+    // before creating it.
+    await this.validateQuestionCode(data);
 
     return this.questionRepository.create(data);
   }
@@ -78,12 +79,21 @@ export class QuestionsService implements Service<Question> {
 
   // PRIVATE METHOD PART
 
+  /**
+   * Function to check the code inside of data argument
+   * {CreateQuestionDto} to check if provided variableName
+   * included in solution and/or starterCode
+   * and also testing the solution against all of
+   * the test case
+   * @param {CreateQuestionDto} data
+   * @returns void
+   */
   private async validateQuestionCode(data: CreateQuestionDto): Promise<void> {
-    const { starterCode, solution, testVariable, testCases } = data;
+    const { solution, testVariable, testCases } = data;
     const { isFunction, variableName } = testVariable;
 
     const { errMsg, isValid } = this.codeExecutionService.validateCode({
-      codes: [starterCode, solution],
+      codes: [solution],
       detail: {
         isFunction,
         variableName,
@@ -98,6 +108,9 @@ export class QuestionsService implements Service<Question> {
       genTestCase,
       { isFunction, variableName },
     );
+
+    if (testResults.isError)
+      throw ErrorApiResponse.badRequest(testResults.errMsg);
 
     if (
       testResults.status === SubmissionStatusEnum.FAILED ||

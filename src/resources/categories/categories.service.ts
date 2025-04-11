@@ -7,7 +7,6 @@ import { ErrorApiResponse } from 'src/core/error-response';
 import { isString } from 'class-validator';
 import { UpdateCategoryDto } from './dto/update.dto';
 import { User } from '../users/domain/user.domain';
-import seedsCategoryAndQuestions from 'src/utils/seeds/data/categories-data.seed';
 
 @Injectable()
 export class CategoriesService
@@ -20,6 +19,10 @@ export class CategoriesService
   }
 
   async onModuleInit() {
+    if (!process.env.NODE_ENV.includes('development')) {
+      return;
+    }
+
     try {
       const count = await this.categoriesRepository.count();
       if (count > 2) {

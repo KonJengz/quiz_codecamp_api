@@ -73,7 +73,9 @@ export abstract class CodeExecutorService {
     options?: CodeExecutionOptions,
   ): Promise<SubmittedCodeResult>;
 
-  public abstract generateTestCase(testCases: TestCase[]): ITestCase[];
+  public abstract generateTestCase(
+    testCases: Omit<TestCase, 'id' | 'createdAt' | 'updatedAt'>[],
+  ): ITestCase[];
 
   public abstract validateCode(input: ValidateCodeInput): ValidateCodeOutput;
 

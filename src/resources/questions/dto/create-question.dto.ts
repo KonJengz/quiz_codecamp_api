@@ -15,10 +15,6 @@ import { CoreApiResponse } from 'src/core/api-response';
 import { TestCase } from 'src/resources/test-cases/domain/test-cases.domain';
 
 export class CreateTestCaseSimulWithQuestion {
-  id: null;
-  createdAt: null;
-  updatedAt: null;
-  deletedAt: null;
   @ApiProperty()
   @IsNotEmpty()
   input: TestCase['input'];
