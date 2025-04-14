@@ -32,3 +32,7 @@ export class GetMyCategoriesResponse extends CoreApiResponse<MyCategory[]> {
   })
   data: MyCategory[];
 }
+
+export type CategoriesQueriesOption = {
+  isChallenge?: 'true' | 'false';
+};

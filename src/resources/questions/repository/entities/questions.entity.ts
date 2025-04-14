@@ -1,9 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
-import {
-  CategorySchema,
-  CategorySchemaClass,
-} from 'src/resources/categories/repository/entities/category.entity';
+import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
 import { TestCaseSchema } from 'src/resources/test-cases/repository/entities/test-cases.entities';
 import { EntityDocumentHelper } from 'src/utils/document-entity.helper';
@@ -19,15 +16,15 @@ export type QuestionDocument = HydratedDocument<QuestionSchemaClass>;
 })
 export class TestCaseSchemaClass extends EntityDocumentHelper {
   @Prop({
-    type: [String],
+    type: [mongoose.Schema.Types.Mixed],
     required: true,
   })
-  input: string[];
+  input: any[];
   @Prop({
-    type: String,
+    type: mongoose.Schema.Types.Mixed,
     required: true,
   })
-  output: string;
+  output: any;
   @Prop({
     required: false,
   })

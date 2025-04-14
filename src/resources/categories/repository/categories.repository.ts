@@ -9,7 +9,12 @@ import { User } from 'src/resources/users/domain/user.domain';
 import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
 import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
-import { seedsCategory } from 'src/utils/seeds/data/questions-related-data.seed';
+import {
+  filterQuestionForCategory,
+  seedsCategory,
+  seedsQuestion,
+} from 'src/utils/seeds/data/questions-related-data.seed';
+import { CategoriesQueriesOption } from '../dto/get.dto';
 
 export type MyCategoryQueried = CategorySchemaClass & {
   solvedQuestions: Types.ObjectId[];
@@ -21,6 +26,8 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
   constructor(
     @InjectModel(CategorySchemaClass.name)
     private readonly categoryModel: Model<CategorySchemaClass>,
+    @InjectModel(QuestionSchemaClass.name)
+    private readonly questionModel: Model<QuestionSchemaClass>,
   ) {}
 
   async count(): Promise<number> {
@@ -29,8 +36,23 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
 
   async seeds(): Promise<unknown> {
     this.logger.log('Start seeding...');
-    this.logger.log('Seeding categories finished!');
-    await this.categoryModel.create(seedsCategory());
+    // Create category
+    const createdCatego = await this.categoryModel.create(seedsCategory());
+    // Create question
+    const createdQuestions = await this.questionModel.create(
+      seedsQuestion(createdCatego),
+    );
+
+    const categoAndQuestionMap = filterQuestionForCategory(
+      createdCatego,
+      createdQuestions,
+    );
+
+    categoAndQuestionMap.forEach(async (questions, categoryId) => {
+      await this.categoryModel.findByIdAndUpdate(categoryId, { questions });
+    });
+
+    this.logger.log('Seeding categories and questions finished!');
     return;
   }
 
@@ -55,8 +77,10 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     return CategoryMapper.toDomain(categoryObj);
   }
 
-  async findMany(): Promise<Category[]> {
-    const categoryObj = await this.categoryModel.find();
+  async findMany(options: CategoriesQueriesOption): Promise<Category[]> {
+    const filter = this.filterOptions(options);
+
+    const categoryObj = await this.categoryModel.find(filter);
     // .populate(CategorySchemaClass.questionsPopulatePath);
     return categoryObj.map(CategoryMapper.toDomain);
   }
@@ -69,9 +93,16 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
    * @param {User["id"]} userId
    * @returns {MyCategory[]}
    */
-  async findMyCategories(userId: User['id']): Promise<MyCategory[]> {
+  async findMyCategories(
+    userId: User['id'],
+    options: CategoriesQueriesOption,
+  ): Promise<MyCategory[]> {
+    const filter = this.filterOptions(options);
     const myCategories: MyCategoryQueried[] =
       await this.categoryModel.aggregate([
+        {
+          $match: filter,
+        },
         // Lookup questions for each category
         {
           $lookup: {
@@ -161,5 +192,24 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
   async deleteAll(): Promise<void> {
     await this.categoryModel.deleteMany();
     return;
+  }
+
+  private filterOptions(
+    options: CategoriesQueriesOption,
+  ): mongoose.RootFilterQuery<CategorySchemaClass> {
+    const { isChallenge } = options;
+    const filter: mongoose.RootFilterQuery<CategorySchemaClass> = {};
+
+    if (!isChallenge) return filter;
+    switch (isChallenge) {
+      case 'true':
+        filter.isChallenge = true;
+        break;
+      case 'false':
+        filter.isChallenge = false;
+        break;
+    }
+
+    return filter;
   }
 }

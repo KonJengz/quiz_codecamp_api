@@ -7,6 +7,7 @@ import { ErrorApiResponse } from 'src/core/error-response';
 import { isString } from 'class-validator';
 import { UpdateCategoryDto } from './dto/update.dto';
 import { User } from '../users/domain/user.domain';
+import { CategoriesQueriesOption } from './dto/get.dto';
 
 @Injectable()
 export class CategoriesService
@@ -54,17 +55,23 @@ export class CategoriesService
     return this.categoriesRepository.create(data);
   }
 
-  getById(id: Category['id']): Promise<Category> {
+  getById(
+    id: Category['id'],
+    options: CategoriesQueriesOption = {},
+  ): Promise<Category> {
     if (!id || !isString(id)) throw ErrorApiResponse.badRequest('ID', id);
     return this.categoriesRepository.findById(id);
   }
 
-  getMany(): Promise<Category[]> {
-    return this.categoriesRepository.findMany();
+  getMany(options: CategoriesQueriesOption = {}): Promise<Category[]> {
+    return this.categoriesRepository.findMany(options);
   }
 
-  getMe(userId: User['id']): Promise<MyCategory[]> {
-    return this.categoriesRepository.findMyCategories(userId);
+  getMe(
+    userId: User['id'],
+    options: CategoriesQueriesOption = {},
+  ): Promise<MyCategory[]> {
+    return this.categoriesRepository.findMyCategories(userId, options);
   }
 
   async update(data: UpdateCategoryDto): Promise<Category> {

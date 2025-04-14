@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { categoriesPath } from 'src/common/path';
 import { CategoriesService } from './categories.service';
 import { Category } from './domain/categories.domain';
 import {
+  CategoriesQueriesOption,
   GetByIdCategoriesResponse,
   GetManyCategoriesResponse,
   GetMyCategoriesResponse,
@@ -23,6 +25,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UpdateCategoryDto, UpdateCategoryResponse } from './dto/update.dto';
 import { openApiDocs } from 'src/docs/open-api.docs';
@@ -34,10 +37,20 @@ import { HttpRequestWithUser } from 'src/common/types/http.type';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Get()
+  @ApiQuery({
+    name: categoriesPath.queries.isChallenge,
+    required: false,
+    type: Boolean,
+    description:
+      'Query to filter type of categories as a challenge and non-challenge. Provide true if desired response is challenge-categories. Otherwise for non-challenge.',
+  })
   @ApiOkResponse({ type: GetManyCategoriesResponse })
-  async getMany(): Promise<GetManyCategoriesResponse> {
-    const categories = await this.categoriesService.getMany();
+  @Get()
+  async getMany(
+    @Query(categoriesPath.queries.isChallenge)
+    isChallenge: CategoriesQueriesOption['isChallenge'],
+  ): Promise<GetManyCategoriesResponse> {
+    const categories = await this.categoriesService.getMany({ isChallenge });
     return GetManyCategoriesResponse.getSuccess<Category[]>(
       categoriesPath.base,
       categories,
@@ -45,13 +58,24 @@ export class CategoriesController {
   }
 
   @ApiBearerAuth()
+  @ApiQuery({
+    name: categoriesPath.queries.isChallenge,
+    required: false,
+    type: Boolean,
+    description:
+      'Query to filter type of categories as a challenge and non-challenge. Provide true if desired response is challenge-categories. Otherwise for non-challenge.',
+  })
   @ApiOkResponse({ type: GetMyCategoriesResponse })
   @UseGuards(AccessTokenAuthGuard)
   @Get(categoriesPath.me)
   async getMe(
     @Req() req: HttpRequestWithUser,
+    @Query(categoriesPath.queries.isChallenge)
+    isChallenge: CategoriesQueriesOption['isChallenge'],
   ): Promise<GetMyCategoriesResponse> {
-    const myCategories = await this.categoriesService.getMe(req.user.userId);
+    const myCategories = await this.categoriesService.getMe(req.user.userId, {
+      isChallenge,
+    });
     return GetMyCategoriesResponse.getSuccess(categoriesPath.me, myCategories);
   }
 

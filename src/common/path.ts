@@ -24,6 +24,9 @@ export const userPath = {
 export const categoriesPath = {
   base: CATEGORIES_PATH,
   me: ME,
+  queries: {
+    isChallenge: 'cha',
+  },
   paramId: 'categoryId',
 };
 
