@@ -1,10 +1,9 @@
 import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
-import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
 
-type SeedingQuestions = (Omit<
-  CreateQuestionDto,
-  'categoryId' | 'testVariable'
-> & { isFunction: boolean; variableName: string })[];
+type SeedingQuestions = (Omit<CreateQuestionDto, 'categoryId'> & {
+  isFunction: boolean;
+  variableName: string;
+})[];
 
 export const stringQuestions: SeedingQuestions = [
   {
