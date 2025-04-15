@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -14,6 +15,7 @@ import {
   CreateQuestionResponse,
 } from './dto/create-question.dto';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
@@ -27,11 +29,13 @@ import {
   GetManyQuestionsResponse,
   GetQuestionByIdAndMySubmissionReponse,
   GetQuestionByIdResponse,
-  GetQuestionsByCategoryIdResponse,
 } from './dto/get-questions.dto';
-import { Category } from '../categories/domain/categories.domain';
 import { Question } from './domain/question.domain';
 import { HttpRequestWithUser } from 'src/common/types/http.type';
+import {
+  UpdateQuestionDto,
+  UpdateQuestionResponse,
+} from './dto/update-question.dto';
 
 @Controller({ version: '1', path: questionsPath.base })
 export class QuestionsController {
@@ -92,17 +96,35 @@ export class QuestionsController {
     );
   }
 
-  @ApiParam({ name: questionsPath.categoryParam, required: true })
-  @ApiOkResponse({ type: GetQuestionsByCategoryIdResponse })
-  @Get(questionsPath.category)
-  async getByCategoryId(
-    @Param(questionsPath.categoryParam) categoryId: Category['id'],
-  ): Promise<GetQuestionsByCategoryIdResponse> {
-    const questions = await this.questionsService.getByCategoryId(categoryId);
+  // @ApiParam({ name: questionsPath.categoryParam, required: true })
+  // @ApiOkResponse({ type: GetQuestionsByCategoryIdResponse })
+  // @Get(questionsPath.category)
+  // async getByCategoryId(
+  //   @Param(questionsPath.categoryParam) categoryId: Category['id'],
+  // ): Promise<GetQuestionsByCategoryIdResponse> {
+  //   const questions = await this.questionsService.getByCategoryId(categoryId);
 
-    return GetQuestionsByCategoryIdResponse.getSuccess(
-      `${categoriesPath.base}/${categoryId}`,
-      questions,
+  //   return GetQuestionsByCategoryIdResponse.getSuccess(
+  //     `${categoriesPath.base}/${categoryId}`,
+  //     questions,
+  //   );
+  // }
+
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UpdateQuestionResponse })
+  @UseGuards(AccessTokenAuthGuard, AdminGuard)
+  @Patch(`:${questionsPath.paramId}`)
+  async update(
+    @Body() body: UpdateQuestionDto,
+  ): Promise<UpdateQuestionResponse> {
+    const updatedQuestion = await this.questionsService.update(
+      body,
+      body.questionId,
+    );
+
+    return UpdateQuestionResponse.patchSuccess(
+      `${questionsPath.base}/${body.questionId}`,
+      updatedQuestion,
     );
   }
 }

@@ -20,6 +20,7 @@ import { AuthModule } from './application/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { SubmissionsModule } from './resources/submissions/submissions.module';
 import { ExecutesModule } from './resources/executes/executes.module';
+import { SeedsModule } from './utils/seeds/seeds.module';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -44,6 +45,7 @@ console.log('Loading env file from:', envPath);
     CustomValidatorModule,
     AuthModule,
     ExecutesModule,
+    env === 'development' ? SeedsModule : null,
   ],
   controllers: [HealthcheckController, AuthController],
   providers: [AuthService],

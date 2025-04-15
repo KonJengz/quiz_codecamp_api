@@ -15,26 +15,12 @@ import { CoreApiResponse } from 'src/core/api-response';
 import { TestCase } from 'src/resources/test-cases/domain/test-cases.domain';
 
 export class CreateTestCaseSimulWithQuestion {
-  id: null;
-  createdAt: null;
-  updatedAt: null;
-  deletedAt: null;
   @ApiProperty()
   @IsNotEmpty()
   input: TestCase['input'];
   @ApiProperty({ type: String })
   @IsNotEmpty()
   output: TestCase['output'];
-}
-
-class TestVariable {
-  @ApiProperty({ type: String })
-  @IsString()
-  variableName: Question['variableName'];
-
-  @ApiProperty({ type: Boolean })
-  @IsBoolean()
-  isFunction: boolean;
 }
 
 export class CreateQuestionDto {
@@ -55,11 +41,12 @@ export class CreateQuestionDto {
   @IsString()
   @MinLength(5)
   starterCode: Question['starterCode'];
-  @ApiProperty({ type: TestVariable })
-  @IsObject()
-  @ValidateNested({ each: true })
-  @Type(() => TestVariable)
-  testVariable: TestVariable;
+  @ApiProperty({ type: String })
+  @IsString()
+  variableName: Question['variableName'];
+  @ApiProperty({ type: Boolean })
+  @IsBoolean()
+  isFunction: boolean;
   @ApiProperty({ type: String })
   @IsString()
   @MinLength(5)

@@ -6,6 +6,11 @@ import { CreateUserDto } from '../dto/create.dto';
 export abstract class UserRepository extends Repository<User> {
   abstract findByUsername(username: User['username']): Promise<NullAble<User>>;
 
+  abstract updateSolvedRecord(
+    isChallenge: boolean,
+    id: User['id'],
+  ): Promise<User>;
+
   abstract count(): Promise<number>;
 
   abstract seeds(users: CreateUserDto[]): Promise<unknown>;

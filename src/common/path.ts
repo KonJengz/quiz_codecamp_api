@@ -1,11 +1,14 @@
 const AUTH_PATH = 'auth';
 const USER_PATH = 'users';
-const CATEGORIES_PATH = 'categories';
-const QUESTIONS_PATH = 'questions';
+const CATEGORIES_PATH = {
+  base: 'categories',
+  paramId: 'categoryId',
+};
+const QUESTIONS_PATH = { base: 'questions', paramId: 'questionId' };
 const SUBMISSIONS_PATH = 'submissions';
 const HEALTH_PATH = 'healthcheck';
 const EXECUTE_PATH = 'executes';
-const ME = 'me';
+export const ME = 'me';
 
 export const authPath = {
   base: AUTH_PATH,
@@ -19,19 +22,24 @@ export const healthCheckPath = {
 export const userPath = {
   base: USER_PATH,
   me: ME,
+  paramId: 'userId',
 };
 
 export const categoriesPath = {
-  base: CATEGORIES_PATH,
+  base: CATEGORIES_PATH.base,
   me: ME,
-  paramId: 'categoryId',
+  queries: {
+    isChallenge: 'cha',
+  },
+  paramId: CATEGORIES_PATH.paramId,
+  getByIdAndMe: `:${CATEGORIES_PATH.paramId}/${ME}`,
 };
 
 export const questionsPath = {
-  base: QUESTIONS_PATH,
-  idAndMe: `:questionId/${SUBMISSIONS_PATH}/${ME}`,
-  getById: ':questionId',
-  paramId: 'questionId',
+  base: QUESTIONS_PATH.base,
+  idAndMe: `:${QUESTIONS_PATH.paramId}/${SUBMISSIONS_PATH}/${ME}`,
+  getById: `:${QUESTIONS_PATH.paramId}`,
+  paramId: QUESTIONS_PATH.paramId,
   category: `${categoriesPath.base}/:${categoriesPath.paramId}`,
   categoryParam: `${categoriesPath.paramId}`,
 };

@@ -5,10 +5,12 @@ import { CodeExecutorModule } from 'src/infrastructure/executor/codeExecutor.mod
 import { AuthModule } from 'src/application/auth/auth.module';
 import { QuestionsModule } from '../questions/questions.module';
 import { SubmissionRepositoryModule } from './repository/submission-repository.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     AuthModule,
+    UsersModule,
     CodeExecutorModule,
     QuestionsModule,
     SubmissionRepositoryModule,

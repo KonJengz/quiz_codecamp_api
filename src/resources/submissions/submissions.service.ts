@@ -12,6 +12,7 @@ import { ErrorApiResponse } from 'src/core/error-response';
 import { Question } from '../questions/domain/question.domain';
 import { TestCase } from '../test-cases/domain/test-cases.domain';
 import { SubmissionRepository } from './repository/submissions-abstract.repository';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class SubmissionsService extends Service<Submission> {
@@ -29,6 +30,7 @@ export class SubmissionsService extends Service<Submission> {
     private readonly codeExecutorService: CodeExecutorService,
     private readonly questionsService: QuestionsService,
     private readonly submissionRepository: SubmissionRepository,
+    private readonly usersService: UsersService,
   ) {
     super();
   }
@@ -69,6 +71,14 @@ export class SubmissionsService extends Service<Submission> {
       userId: data.userId,
       status: testResults.status,
     });
+
+    // Update user solved record if the submission passed all the test case.
+    if (createdSubmission.status === SubmissionStatusEnum.PASSED) {
+      await this.usersService.updateSolvedRecord(
+        isQuestionsExist.category.isChallenge,
+        data.userId,
+      );
+    }
 
     return {
       ...createdSubmission,

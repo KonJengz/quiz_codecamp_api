@@ -1,5 +1,3 @@
-import { Promisable } from './types/types';
-
 export abstract class Service<T extends { id: string }> {
   abstract create(data: unknown): Promise<T>;
 
