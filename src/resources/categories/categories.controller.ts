@@ -9,12 +9,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { categoriesPath } from 'src/common/path';
+import { categoriesPath, ME } from 'src/common/path';
 import { CategoriesService } from './categories.service';
-import { Category } from './domain/categories.domain';
+import { Category, QuestionInCategoryList } from './domain/categories.domain';
 import {
   CategoriesQueriesOption,
   GetByIdCategoriesResponse,
+  GetCategoryByIdAndMe,
   GetManyCategoriesResponse,
   GetMyCategoriesResponse,
 } from './dto/get.dto';
@@ -85,10 +86,35 @@ export class CategoriesController {
   async getById(
     @Param(categoriesPath.paramId) id: Category['id'],
   ): Promise<GetByIdCategoriesResponse> {
-    const category = await this.categoriesService.getById(id);
+    // This is definitely not the best way
+    // to make sure that category is correct type --> Category<QuestionInCategoryList>
+    // but to not fix a lot of code base
+    // we make sure that this will be Category<QuestionInCategoryList>
+    const category =
+      await this.categoriesService.getById<QuestionInCategoryList>(id);
     return GetByIdCategoriesResponse.getSuccess(
       `${categoriesPath.base}/${id}`,
       category,
+    );
+  }
+
+  @ApiBearerAuth()
+  @ApiParam({ name: categoriesPath.paramId })
+  @ApiOkResponse({ type: GetCategoryByIdAndMe })
+  @UseGuards(AccessTokenAuthGuard)
+  @Get(categoriesPath.getByIdAndMe)
+  async getByIdAndMe(
+    @Param(categoriesPath.paramId) id: Category['id'],
+    @Req() req: HttpRequestWithUser,
+  ): Promise<GetCategoryByIdAndMe> {
+    const categoryAndMyQuestionList = await this.categoriesService.getByIdAndMe(
+      id,
+      req.user.userId,
+    );
+
+    return GetCategoryByIdAndMe.getSuccess(
+      `${categoriesPath.base}/${id}/${ME}`,
+      categoryAndMyQuestionList,
     );
   }
 

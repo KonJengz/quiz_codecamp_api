@@ -1,10 +1,14 @@
 import { Repository } from 'src/infrastructure/persistence/config/repository';
-import { Category, MyCategory } from '../domain/categories.domain';
+import {
+  Category,
+  MyCategory,
+  QuestionAndSolveStatus,
+} from '../domain/categories.domain';
 import { User } from 'src/resources/users/domain/user.domain';
 import { CategoriesQueriesOption } from '../dto/get.dto';
 
 export abstract class CategoriesRepository extends Repository<Category> {
-  abstract override findById(id: string): Promise<Category>;
+  abstract override findById<T>(id: string): Promise<Category<T>>;
   abstract override findMany(
     options?: CategoriesQueriesOption,
   ): Promise<Category[]>;
@@ -15,6 +19,11 @@ export abstract class CategoriesRepository extends Repository<Category> {
     userId: User['id'],
     options?: CategoriesQueriesOption,
   ): Promise<MyCategory[]>;
+
+  abstract findByIdIncludeUserDetail(
+    id: Category['id'],
+    userId: User['id'],
+  ): Promise<Category<QuestionAndSolveStatus>>;
 
   abstract count(): Promise<number>;
 

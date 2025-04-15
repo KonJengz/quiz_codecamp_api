@@ -1,13 +1,20 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CategoriesRepository } from './repository/categories-abstract.repository';
 import { Service } from 'src/common/base-class';
-import { Category, MyCategory } from './domain/categories.domain';
+import {
+  Category,
+  MyCategory,
+  QuestionAndSolveStatus,
+  QuestionInCategoryList,
+} from './domain/categories.domain';
 import { CreateCategoryDto } from './dto/create.dto';
 import { ErrorApiResponse } from 'src/core/error-response';
 import { isString } from 'class-validator';
 import { UpdateCategoryDto } from './dto/update.dto';
 import { User } from '../users/domain/user.domain';
 import { CategoriesQueriesOption } from './dto/get.dto';
+import { Question } from '../questions/domain/question.domain';
+import { IDValidator } from 'src/utils/IDValidatior';
 
 @Injectable()
 export class CategoriesService
@@ -55,12 +62,9 @@ export class CategoriesService
     return this.categoriesRepository.create(data);
   }
 
-  getById(
-    id: Category['id'],
-    options: CategoriesQueriesOption = {},
-  ): Promise<Category> {
-    if (!id || !isString(id)) throw ErrorApiResponse.badRequest('ID', id);
-    return this.categoriesRepository.findById(id);
+  getById<T>(id: Category['id']): Promise<Category<T>> {
+    IDValidator(id, 'Category');
+    return this.categoriesRepository.findById<T>(id);
   }
 
   getMany(options: CategoriesQueriesOption = {}): Promise<Category[]> {
@@ -72,6 +76,17 @@ export class CategoriesService
     options: CategoriesQueriesOption = {},
   ): Promise<MyCategory[]> {
     return this.categoriesRepository.findMyCategories(userId, options);
+  }
+
+  async getByIdAndMe(
+    categoryId: Category['id'],
+    userId: User['id'],
+  ): Promise<Category<QuestionAndSolveStatus>> {
+    IDValidator(categoryId, 'Category');
+    return this.categoriesRepository.findByIdIncludeUserDetail(
+      categoryId,
+      userId,
+    );
   }
 
   async update(data: UpdateCategoryDto): Promise<Category> {

@@ -10,6 +10,8 @@ import { Category } from '../categories/domain/categories.domain';
 import { IDValidator } from 'src/utils/IDValidatior';
 import { SubmissionStatusEnum } from '../submissions/domain/submission.domain';
 import { User } from '../users/domain/user.domain';
+import { UpdateQuestionDto } from './dto/update-question.dto';
+import { ObjectHelper } from 'src/utils/object.helper';
 
 @Injectable()
 export class QuestionsService implements Service<Question> {
@@ -73,11 +75,17 @@ export class QuestionsService implements Service<Question> {
   getMany(): Promise<Question[]> {
     return this.questionRepository.findMany();
   }
-  update(data: Partial<Omit<Question, 'id'>>, id: string): Promise<Question> {
-    return this.questionRepository.update(data, id);
+  async update(data: UpdateQuestionDto, id: string): Promise<Question> {
+    const question = await this.questionRepository.findById(id);
+
+    if (!question) throw ErrorApiResponse.notFound('ID', id, 'Questions');
+
+    const processedData = await this.validateUpdateInfo(data, question);
+
+    return this.questionRepository.update(processedData, id);
   }
 
-  // PRIVATE METHOD PART
+  // --- PRIVATE METHOD PART ---
 
   /**
    * Function to check the code inside of data argument
@@ -89,8 +97,7 @@ export class QuestionsService implements Service<Question> {
    * @returns void
    */
   private async validateQuestionCode(data: CreateQuestionDto): Promise<void> {
-    const { solution, testVariable, testCases } = data;
-    const { isFunction, variableName } = testVariable;
+    const { solution, isFunction, variableName, testCases } = data;
 
     const { errMsg, isValid } = this.codeExecutionService.validateCode({
       codes: [solution],
@@ -127,5 +134,66 @@ export class QuestionsService implements Service<Question> {
       }
 
     return;
+  }
+
+  private async validateUpdateInfo(
+    data: UpdateQuestionDto,
+    question: Question,
+  ): Promise<UpdateQuestionDto> {
+    // Declare the array contain the keys which need to validate the code
+    // before updating
+    const mustValidateFields: Omit<keyof UpdateQuestionDto, 'questionId'>[] = [
+      'isFunction',
+      'solution',
+      'starterCode',
+      'variableName',
+    ];
+
+    const { questionId, categoryId, title, isFunction } = data;
+
+    // Processing the category part if provided.
+    if (categoryId) {
+      const category = await this.categoriesService.getById(categoryId);
+
+      if (!category)
+        throw ErrorApiResponse.notFound('ID', categoryId, 'Category');
+    }
+
+    // If there are to-be-update title,
+    // check first if it's duplicate.
+    if (title) {
+      const isTitleExist = await this.questionRepository.findByTitle(title);
+
+      if (isTitleExist)
+        throw ErrorApiResponse.conflictRequest(
+          `The title : ${title} is already exist with ID:${isTitleExist.id}`,
+        );
+    }
+    // Adding isFunction to question to check the to-be-update isFunction
+    if (isFunction) {
+      let toValidateIsFunction: boolean =
+        this.codeExecutionService.validateFunctionSyntax(question.starterCode);
+      question['isFunction'] = toValidateIsFunction;
+    }
+
+    const toUpdateData = ObjectHelper.nonMutateDeDuplicateNewObj<
+      Omit<UpdateQuestionDto, 'questionId'>
+    >(question, data);
+
+    if (ObjectHelper.isEmpty(toUpdateData))
+      throw ErrorApiResponse.conflictRequest();
+
+    const toUpdateFields: (keyof UpdateQuestionDto)[] = Object.keys(
+      toUpdateData,
+    ) as (keyof UpdateQuestionDto)[];
+
+    if (
+      toUpdateFields.some((toUpdateField) =>
+        mustValidateFields.includes(toUpdateField),
+      )
+      // Validate the to-be-update code part
+      // which is variableName, solution and starterCode
+    )
+      return { questionId, ...toUpdateData };
   }
 }

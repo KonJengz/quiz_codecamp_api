@@ -1,5 +1,9 @@
 import mongoose, { Model, Types } from 'mongoose';
-import { Category, MyCategory } from '../domain/categories.domain';
+import {
+  Category,
+  MyCategory,
+  QuestionAndSolveStatus,
+} from '../domain/categories.domain';
 import { CategoriesRepository } from './categories-abstract.repository';
 import { CategorySchemaClass } from './entities/category.entity';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,6 +19,7 @@ import {
   seedsQuestion,
 } from 'src/utils/seeds/data/questions-related-data.seed';
 import { CategoriesQueriesOption } from '../dto/get.dto';
+import { Question } from 'src/resources/questions/domain/question.domain';
 
 export type MyCategoryQueried = CategorySchemaClass & {
   solvedQuestions: Types.ObjectId[];
@@ -63,8 +68,10 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     return CategoryMapper.toDomain(categoryObj);
   }
 
-  async findById(id: Category['id']): Promise<Category> {
-    const categoryObj = await this.categoryModel.findById(id);
+  async findById<T>(id: Category['id']): Promise<Category<T>> {
+    const categoryObj = await this.categoryModel
+      .findById(id)
+      .populate(CategorySchemaClass.questionsPopulatePath, '_id title');
 
     return CategoryMapper.toDomain(categoryObj);
   }
@@ -174,6 +181,92 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
       ]);
 
     return myCategories.map(CategoryMapper.toMyCategoryDomain);
+  }
+
+  async findByIdIncludeUserDetail(
+    id: Category['id'],
+    userId: User['id'],
+  ): Promise<Category<QuestionAndSolveStatus>> {
+    const categoryAndUserDetail = await this.categoryModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      // Lookup questions for each category
+      {
+        $lookup: {
+          from: QuestionSchemaClass.actualCollectionName,
+          localField: '_id',
+          foreignField: 'categoryId',
+          as: 'questions',
+        },
+      },
+      // Unwind each question to operate on each individually
+      {
+        $unwind: {
+          path: '$questions',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Lookup submissions from each question (using corrected field reference)
+      {
+        $lookup: {
+          from: SubmissionSchemaClass.actualCollectionName,
+          let: { questionId: '$questions._id' },
+          pipeline: [
+            {
+              // Match the questionId, userId and PASSED status
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$questionId', '$$questionId'] },
+                    { $eq: ['$userId', new mongoose.Types.ObjectId(userId)] },
+                    { $eq: ['$status', SubmissionStatusEnum.PASSED] },
+                  ],
+                },
+              },
+            },
+            // Only grab the id of document
+            { $project: { _id: 1 } },
+          ],
+          as: 'submissions',
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          name: { $first: '$name' },
+          isChallenge: { $first: '$isChallenge' },
+          deletedAt: { $first: '$deletedAt' },
+          createdAt: { $first: '$createdAt' },
+          updatedAt: { $first: '$updatedAt' },
+          __v: { $first: '$__v' },
+          // Collect only the question ID
+          questions: {
+            $push: {
+              _id: '$questions._id',
+              title: '$questions.title',
+              isSolved: {
+                $cond: [
+                  {
+                    $gt: [{ $size: '$submissions' }, 0],
+                  },
+                  true,
+                  false,
+                ],
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    if (categoryAndUserDetail.length === 0) return null;
+
+    return CategoryMapper.toDomain<QuestionAndSolveStatus>(
+      categoryAndUserDetail[0],
+    );
   }
 
   async update<U extends Partial<Omit<Category, 'id'>>>(

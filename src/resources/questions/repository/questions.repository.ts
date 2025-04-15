@@ -42,7 +42,7 @@ export class QuestionDocumentRepository implements QuestionRepository {
   });
 
   async create(data: CreateQuestionDto): Promise<Question> {
-    const { testCases, testVariable, ...rest } = data;
+    const { testCases, ...rest } = data;
 
     // starting transaction
     // const session = await this.mongoConnection.startSession();
@@ -50,7 +50,6 @@ export class QuestionDocumentRepository implements QuestionRepository {
     // try {
     const createdQuestion = new this.questionModel({
       ...rest,
-      ...testVariable,
       testCases,
     });
     await createdQuestion.save();

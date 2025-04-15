@@ -1,18 +1,38 @@
 import mongoose from 'mongoose';
-import { Category, MyCategory } from '../../domain/categories.domain';
+import {
+  Category,
+  MyCategory,
+  QuestionAndSolveStatus,
+} from '../../domain/categories.domain';
 import { CategorySchemaClass } from '../entities/category.entity';
 import { MyCategoryQueried } from '../categories.repository';
+import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
+import { Question } from 'src/resources/questions/domain/question.domain';
+
+type QuestionDetailInCategorySchema = {
+  _id: mongoose.Types.ObjectId;
+  id?: string;
+  title: QuestionSchemaClass['title'];
+  isSolved: boolean;
+};
 
 export class CategoryMapper {
-  public static toDomain(documentEntity: CategorySchemaClass): Category {
+  public static toDomain<T = string>(
+    documentEntity: CategorySchemaClass,
+  ): Category<T> {
     // If there are no document entity provided, return null
     if (!documentEntity) return null;
-    const docObj = documentEntity.toObject();
+    if (documentEntity.toObject) {
+    }
+    const docObj = documentEntity.toObject
+      ? documentEntity.toObject()
+      : documentEntity;
 
-    if (docObj.questions.length > 0)
-      docObj.questions = docObj.questions.map((item: mongoose.Types.ObjectId) =>
-        item.toString(),
+    if (docObj.questions.length > 0) {
+      docObj.questions = docObj.questions.map(
+        CategoryMapper.mappingQuestionsField,
       );
+    }
 
     return new Category({ ...docObj, id: docObj._id.toString() });
   }
@@ -34,5 +54,20 @@ export class CategoryMapper {
       questions,
       solvedQuestions,
     });
+  }
+
+  private static mappingQuestionsField(
+    question: mongoose.Types.ObjectId | QuestionDetailInCategorySchema,
+  ): Question['id'] | QuestionAndSolveStatus {
+    const questionDetailsKey = { title: true, isSolved: true };
+    const questionKeys = Object.keys(question);
+
+    if (questionKeys.some((key) => questionDetailsKey[key])) {
+      const { _id, id, ...rest } = question as QuestionDetailInCategorySchema;
+
+      return { questionId: _id.toString(), ...rest };
+    }
+
+    return question.toString();
   }
 }

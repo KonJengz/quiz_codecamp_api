@@ -23,16 +23,6 @@ export class CreateTestCaseSimulWithQuestion {
   output: TestCase['output'];
 }
 
-class TestVariable {
-  @ApiProperty({ type: String })
-  @IsString()
-  variableName: Question['variableName'];
-
-  @ApiProperty({ type: Boolean })
-  @IsBoolean()
-  isFunction: boolean;
-}
-
 export class CreateQuestionDto {
   @ApiProperty({ type: String })
   @IsString()
@@ -51,11 +41,12 @@ export class CreateQuestionDto {
   @IsString()
   @MinLength(5)
   starterCode: Question['starterCode'];
-  @ApiProperty({ type: TestVariable })
-  @IsObject()
-  @ValidateNested({ each: true })
-  @Type(() => TestVariable)
-  testVariable: TestVariable;
+  @ApiProperty({ type: String })
+  @IsString()
+  variableName: Question['variableName'];
+  @ApiProperty({ type: Boolean })
+  @IsBoolean()
+  isFunction: boolean;
   @ApiProperty({ type: String })
   @IsString()
   @MinLength(5)

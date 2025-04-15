@@ -2,16 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BaseDomain } from 'src/common/base-domain';
 import { Question } from 'src/resources/questions/domain/question.domain';
 
-type CategoryInputConstructor = Category;
-
-export class Category extends BaseDomain {
+export class Category<TQuestions = string> extends BaseDomain {
   @ApiProperty({ type: String, example: 'Array' })
   name: string;
   @ApiProperty({ type: Boolean, example: 'false' })
   isChallenge: boolean;
 
   @ApiProperty({ type: [String], example: [''] })
-  questions: Question['id'][];
+  questions: TQuestions[];
 
   constructor({
     id,
@@ -21,7 +19,7 @@ export class Category extends BaseDomain {
     createdAt,
     updatedAt,
     deletedAt,
-  }: CategoryInputConstructor) {
+  }: Category<TQuestions>) {
     super({ id, createdAt, updatedAt, deletedAt });
     this.name = name;
     this.isChallenge = isChallenge;
@@ -29,9 +27,21 @@ export class Category extends BaseDomain {
   }
 }
 
-export class MyCategory extends Category {
+export class QuestionInCategoryList {
+  @ApiProperty({ type: String, example: '67fcc1ad3dfd9aaccee326c4' })
+  public questionId: Question['id'];
+  @ApiProperty({ type: String, example: 'Fizz Buzz' })
+  public title: Question['title'];
+}
+
+export class QuestionAndSolveStatus extends QuestionInCategoryList {
+  @ApiProperty({ type: Boolean, example: true })
+  public isSolved: boolean;
+}
+
+export class MyCategory extends Category<Question['id']> {
   @ApiProperty({ type: [String], example: ['dfs', 'sfssdxefdsfdsf'] })
-  solvedQuestions: Question['id'][];
+  public solvedQuestions: Question['id'][];
 
   constructor(input: MyCategory) {
     const {

@@ -2,7 +2,12 @@ import { Category } from 'src/resources/categories/domain/categories.domain';
 import { CreateCategoryDto } from 'src/resources/categories/dto/create.dto';
 import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
 import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
-import { loopQuestions, stringQuestions } from './questions.data';
+import {
+  conditionalQuestions,
+  loopQuestions,
+  numberQuestions,
+  stringQuestions,
+} from './questions.data';
 import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
 import { Question } from 'src/resources/questions/domain/question.domain';
 
@@ -17,6 +22,10 @@ const categoriesData: CreateCategoryDto[] = [
     isChallenge: false,
   },
   {
+    name: 'Number',
+    isChallenge: false,
+  },
+  {
     name: 'Conditional',
     isChallenge: false,
   },
@@ -25,12 +34,6 @@ const categoriesData: CreateCategoryDto[] = [
     isChallenge: false,
   },
 ];
-// function generateQuestionData(categoryId: Category['id']): CreateQuestionDto {
-//   return {
-//     categoryId,
-//     description,
-//   };
-// }
 
 export function seedsCategory() {
   const categories: CreateCategoryDto[] = categoriesData;
@@ -69,8 +72,14 @@ export function seedsQuestion(
       case 'String':
         pushingSeedData(stringQuestions, category.id);
         break;
+      case 'Number':
+        pushingSeedData(numberQuestions, category.id);
+        break;
       case 'Loop':
         pushingSeedData(loopQuestions, category.id);
+        break;
+      case 'Conditional':
+        pushingSeedData(conditionalQuestions, category.id);
         break;
     }
   });
