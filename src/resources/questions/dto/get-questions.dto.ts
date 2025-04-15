@@ -23,9 +23,9 @@ export class GetQuestionByIdAndMySubmissionReponse extends CoreApiResponse<Quest
   data: QuestionAndSubmission;
 }
 
-export class GetQuestionsByCategoryIdResponse extends CoreApiResponse<
-  ManyQuestionsDataType[]
-> {
-  @ApiProperty({ type: [ManyQuestionsDataType] })
-  data: ManyQuestionsDataType[];
-}
+// export class GetQuestionsByCategoryIdResponse extends CoreApiResponse<
+//   ManyQuestionsDataType[]
+// > {
+//   @ApiProperty({ type: [ManyQuestionsDataType] })
+//   data: ManyQuestionsDataType[];
+// }

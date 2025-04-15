@@ -29,9 +29,7 @@ import {
   GetManyQuestionsResponse,
   GetQuestionByIdAndMySubmissionReponse,
   GetQuestionByIdResponse,
-  GetQuestionsByCategoryIdResponse,
 } from './dto/get-questions.dto';
-import { Category } from '../categories/domain/categories.domain';
 import { Question } from './domain/question.domain';
 import { HttpRequestWithUser } from 'src/common/types/http.type';
 import {
@@ -98,19 +96,19 @@ export class QuestionsController {
     );
   }
 
-  @ApiParam({ name: questionsPath.categoryParam, required: true })
-  @ApiOkResponse({ type: GetQuestionsByCategoryIdResponse })
-  @Get(questionsPath.category)
-  async getByCategoryId(
-    @Param(questionsPath.categoryParam) categoryId: Category['id'],
-  ): Promise<GetQuestionsByCategoryIdResponse> {
-    const questions = await this.questionsService.getByCategoryId(categoryId);
+  // @ApiParam({ name: questionsPath.categoryParam, required: true })
+  // @ApiOkResponse({ type: GetQuestionsByCategoryIdResponse })
+  // @Get(questionsPath.category)
+  // async getByCategoryId(
+  //   @Param(questionsPath.categoryParam) categoryId: Category['id'],
+  // ): Promise<GetQuestionsByCategoryIdResponse> {
+  //   const questions = await this.questionsService.getByCategoryId(categoryId);
 
-    return GetQuestionsByCategoryIdResponse.getSuccess(
-      `${categoriesPath.base}/${categoryId}`,
-      questions,
-    );
-  }
+  //   return GetQuestionsByCategoryIdResponse.getSuccess(
+  //     `${categoriesPath.base}/${categoryId}`,
+  //     questions,
+  //   );
+  // }
 
   @ApiBearerAuth()
   @ApiOkResponse({ type: UpdateQuestionResponse })
