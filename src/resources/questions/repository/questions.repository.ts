@@ -39,7 +39,7 @@ export class QuestionDocumentRepository implements QuestionRepository {
       testCases,
     });
     await createdQuestion.save();
-    // Update the category to have newly created question
+    // // Update the category to have newly created question
     await this.categoryModel.findByIdAndUpdate(createdQuestion.categoryId, {
       $push: { questions: createdQuestion._id },
     });

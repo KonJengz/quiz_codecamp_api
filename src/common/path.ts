@@ -5,6 +5,7 @@ const CATEGORIES_PATH = {
   paramId: 'categoryId',
 };
 const QUESTIONS_PATH = { base: 'questions', paramId: 'questionId' };
+const TESTCASES_PATH = { base: 'test-cases' };
 const SUBMISSIONS_PATH = 'submissions';
 const HEALTH_PATH = 'healthcheck';
 const EXECUTE_PATH = 'executes';
@@ -51,4 +52,9 @@ export const submissionsPath = {
 
 export const executesPath = {
   base: EXECUTE_PATH,
+};
+
+export const testCasesPath = {
+  base: TESTCASES_PATH.base,
+  matchers: `matchers`,
 };

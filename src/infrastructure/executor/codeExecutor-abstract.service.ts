@@ -75,6 +75,7 @@ export abstract class CodeExecutorService {
 
   public abstract generateTestCase(
     testCases: Omit<TestCase, 'id' | 'createdAt' | 'updatedAt'>[],
+    variableName: string,
   ): ITestCase[];
 
   public abstract validateCode(input: ValidateCodeInput): ValidateCodeOutput;

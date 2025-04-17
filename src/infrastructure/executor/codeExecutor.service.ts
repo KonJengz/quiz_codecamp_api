@@ -47,7 +47,8 @@ export interface ITestCase {
    * Expected results
    */
   expected: any;
-  input: any[];
+  not: boolean;
+  input?: any[];
 }
 
 export type ResultsFromExecuted = {
@@ -245,12 +246,6 @@ export class IVMCodeExecutor implements CodeExecutorService {
               `The test case does not provide input or output. Please try again.`,
             );
 
-          // const result = await context.evalClosure(
-          //   `return ${fnName}(${testCase.input.join(',')})`,
-          //   [],
-          //   { arguments: { copy: true }, result: { copy: true } },
-          // );
-
           // Invoked function with the input of the test case
           // and return the value back.
           const result = await context.eval(
@@ -314,20 +309,34 @@ export class IVMCodeExecutor implements CodeExecutorService {
     };
 
     let passed: ResultsFromExecuted['passed'] = true;
-    console.log('Code', code);
-    const response = await context.eval(code, {
-      timeout: this.ivmConfig.timeout,
-    });
-    console.log('Response', response);
+
+    // Run the user's code first
+    // So that the variable or context know the variable
+    try {
+      await context.eval(code, {
+        timeout: this.ivmConfig.timeout,
+      });
+    } catch (err) {
+      results.failed.push({
+        actual: '',
+        expected: '',
+        testCase: 0,
+        error: `There is an error while running code.: \n ${err?.message}`,
+      });
+
+      return { results, passed: false };
+    }
+
     if (testCases.length > 0) {
       for (const [index, testCase] of testCases.entries()) {
         const numOrder = index + 1;
         try {
           const assertionCode = this.generateAssertionCode(testCase);
-          const testResult: TestResultType = await context.eval(assertionCode, {
+          const unParsedTestResult: string = await context.eval(assertionCode, {
             timeout: this.ivmConfig.timeout,
           });
 
+          const testResult: TestResultType = JSON.parse(unParsedTestResult);
           const testResultDetail = this.resolveTestResult(testResult, numOrder);
           if (!testResult.passed) {
             results.failed.push(testResultDetail);
@@ -392,17 +401,36 @@ export class IVMCodeExecutor implements CodeExecutorService {
 
   public generateTestCase(
     testCases: CreateQuestionDto['testCases'],
+    variableName: string,
   ): ITestCase[] {
-    return testCases.map(({ input, output }) => {
-      let matcher = TestCaseMatcherEnum.toBe;
+    return testCases.map((testCase) => {
+      let { expected, input, variable, not, matcher } = testCase;
 
-      if (typeof output === 'object')
-        matcher = TestCaseMatcherEnum.toBeDeepEqual;
+      let expect;
+      // This is the case where isFunction is false
+      // or question code is not a function.
+      if (!input || input.length === 0) {
+        // If they provide variable value,
+        // Assign it for input instead
+        if (variable) {
+          expect = variable;
+        } else {
+          // If they not provide anything,
+          // just assign it with Question["variableName"]
+          expect = variableName;
+        }
+      }
+
+      if (expected == null || expected == undefined) {
+        expected = JSON.stringify(expected);
+      }
 
       return {
-        expected: output,
+        expected,
+        input: input ?? [],
         matcher,
-        input: input,
+        expect,
+        not: not ?? false,
       };
     });
   }

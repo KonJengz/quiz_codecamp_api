@@ -12,6 +12,7 @@ import { SubmissionStatusEnum } from '../submissions/domain/submission.domain';
 import { User } from '../users/domain/user.domain';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { ObjectHelper } from 'src/utils/object.helper';
+import { ITestCase } from 'src/infrastructure/executor/codeExecutor.service';
 
 @Injectable()
 export class QuestionsService implements Service<Question> {
@@ -41,6 +42,22 @@ export class QuestionsService implements Service<Question> {
     // Validate the question code
     // before creating it.
     await this.validateQuestionCode(data);
+
+    const { variableName, isFunction } = data;
+
+    // Generate test case
+    const genTestCase = this.codeExecutionService.generateTestCase(
+      data.testCases,
+      data.variableName,
+    );
+
+    await this.testingCodeWithTestCases(
+      data.solution,
+      { isFunction, variableName },
+      genTestCase,
+    );
+
+    data.testCases = genTestCase;
 
     return this.questionRepository.create(data);
   }
@@ -109,10 +126,22 @@ export class QuestionsService implements Service<Question> {
 
     if (!isValid) throw ErrorApiResponse.badRequest(errMsg);
 
-    const genTestCase = this.codeExecutionService.generateTestCase(testCases);
+    return;
+  }
+
+  private async testingCodeWithTestCases(
+    solution: Question['solution'],
+    details: {
+      isFunction: Question['isFunction'];
+      variableName: Question['variableName'];
+    },
+    testCases: ITestCase[],
+  ) {
+    const { isFunction, variableName } = details;
+
     const testResults = await this.codeExecutionService.submit(
       solution,
-      genTestCase,
+      testCases,
       { isFunction, variableName },
     );
 

@@ -3,6 +3,7 @@ import { BaseDomain } from 'src/common/base-domain';
 import { Category } from 'src/resources/categories/domain/categories.domain';
 import { TestCase } from '../../test-cases/domain/test-cases.domain';
 import { Submission } from 'src/resources/submissions/domain/submission.domain';
+import { Exclude, Expose } from 'class-transformer';
 
 type QuestionConstructorInput = Question;
 
@@ -42,6 +43,8 @@ export class Question extends BaseDomain {
   category: CategoryForQuestion;
   @ApiProperty({ type: String })
   variableName: string;
+  @Exclude({ toPlainOnly: true })
+  isFunction: boolean;
   @ApiProperty({ type: TestCase })
   testCases: TestCase[];
 
@@ -57,6 +60,7 @@ export class Question extends BaseDomain {
       variableName,
       updatedAt,
       testCases,
+      isFunction,
       deletedAt,
     } = input;
 
@@ -69,6 +73,7 @@ export class Question extends BaseDomain {
     this.starterCode = starterCode;
     this.category = category;
     this.testCases = testCases;
+    this.isFunction = isFunction;
   }
 }
 

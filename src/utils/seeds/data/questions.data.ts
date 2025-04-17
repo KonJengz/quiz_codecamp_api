@@ -1,4 +1,19 @@
-import { CreateQuestionDto } from 'src/resources/questions/dto/create-question.dto';
+import { TestCaseMatcherEnum } from 'src/infrastructure/executor/codeExecutor.service';
+import {
+  CreateQuestionDto,
+  CreateTestCaseSimulWithQuestion,
+} from 'src/resources/questions/dto/create-question.dto';
+import { TestCaseSchemaClass } from 'src/resources/test-cases/repository/entities/test-cases.entities';
+
+function generateSeedingTestCase(
+  testCases: Pick<TestCaseSchemaClass, 'input' | 'expected'>[],
+): CreateTestCaseSimulWithQuestion[] {
+  return testCases.map((testCase) => ({
+    ...testCase,
+    matcher: TestCaseMatcherEnum.toBe,
+    not: false,
+  }));
+}
 
 type SeedingQuestions = (Omit<CreateQuestionDto, 'categoryId'> & {
   isFunction: boolean;
@@ -12,13 +27,13 @@ export const stringQuestions: SeedingQuestions = [
     description: `เขียนฟังก์ชันที่รับข้อความและคืนค่าจำนวนตัวอักษรทั้งหมด
 ตัวอย่างที่ 1
 Input: "hello"
-Output: 5
+expected: 5
 ตัวอย่างที่ 2
 Input: "codecamp"
-Output: 8
+expected: 8
 ตัวอย่างที่ 3
 Input: "Thailand"
-Output: 8
+expected: 8
 `,
     solution: `
 function countLetter(word) {
@@ -35,15 +50,21 @@ function countLetter(word) {
     testCases: [
       {
         input: ['hello'],
-        output: 5,
+        expected: 5,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['codecamp'],
-        output: 8,
+        expected: 8,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['Thailand'],
-        output: 8,
+        expected: 8,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
     ],
     isFunction: true,
@@ -54,7 +75,7 @@ function countLetter(word) {
     title: 'กลับคำ',
     description: `เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และคืนค่าข้อความที่เรียงตัวอักษรกลับจากหลังมาหน้า
 ตัวอย่าง Input: "hello"
-ตัวอย่าง Output: "olleh"
+ตัวอย่าง expected: "olleh"
 `,
     solution: `function reverseWord(word) {
     return word.split("").reverse().join("")
@@ -71,15 +92,21 @@ function reverseWord(word) {
     testCases: [
       {
         input: ['hello'],
-        output: 'olleh',
+        expected: 'olleh',
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['apple'],
-        output: 'elppa',
+        expected: 'elppa',
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['paparazzi'],
-        output: 'izzarapap',
+        expected: 'izzarapap',
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
     ],
     isFunction: true,
@@ -91,13 +118,13 @@ function reverseWord(word) {
     description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และนับจำนวนสระ (a, e, i, o, u) ที่อยู่ในข้อความนั้น (ไม่นับตัวพิมพ์ใหญ่/เล็ก)
 ตัวอย่างที่ 1:
 Input: "Programming"
-Output: 3
+expected: 3
 ตัวอย่างที่ 2:
 Input: "javascript"
-Output: 3
+expected: 3
 ตัวอย่างที่ 3:
 Input: "developer"
-Output: 4
+expected: 4
 `,
     solution: `function vowelCount(text) {
   const lowerText = text.toLowerCase();
@@ -123,19 +150,27 @@ function vowelCount(text) {
     testCases: [
       {
         input: ['Programming'],
-        output: 3,
+        expected: 3,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['developer'],
-        output: 4,
+        expected: 4,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['apple'],
-        output: 1,
+        expected: 1,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['crypt'],
-        output: 0,
+        expected: 0,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
     ],
     isFunction: true,
@@ -147,13 +182,13 @@ function vowelCount(text) {
     description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และนับจำนวนคำที่อยู่ในข้อความนั้น (โดยถือว่าคำถูกคั่นด้วยช่องว่าง)
 ตัวอย่างที่ 1:
  Input: "This is a sample sentence."
-Output: 5
+expected: 5
 ตัวอย่างที่ 2:
  Input: "Internet protocol in OSI model"
-Output: 5
+expected: 5
 ตัวอย่างที่ 3:
  Input: "Integrated Development Environment"
-Output: 3
+expected: 3
 `,
     solution: `function countWords(text) {
   return text.split(" ").length;
@@ -170,25 +205,35 @@ function countWords(text) {
     testCases: [
       {
         input: ['This is a sample sentence.'],
-        output: 5,
+        expected: 5,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['Internet protocol in OSI model'],
-        output: 5,
+        expected: 5,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['Integrated Development Environment'],
-        output: 3,
+        expected: 3,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['You should always try to avoid long sentences.'],
-        output: 8,
+        expected: 8,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: [
           'He looked out of the window, noticing the girl who, at that moment, was walking towards the heavy door to the library.',
         ],
-        output: 22,
+        expected: 22,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
     ],
     isFunction: true,
@@ -200,13 +245,13 @@ function countWords(text) {
     description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และตรวจสอบว่าเป็น Palindrome (อ่านจากหน้าไปหลังและหลังมาหน้าได้เหมือนกัน) หรือไม่ (ไม่สนใจตัวพิมพ์ใหญ่/เล็กและช่องว่าง)
 ตัวอย่างที่ 1:
 Input: "Racecar"
-Output: true
+expected: true
 ตัวอย่างที่ 2:
 Input: "level"
-Output: true
+expected: true
 ตัวอย่างที่ 3:
 Input: "code"
-Output: false
+expected: false
 `,
     solution: `function isPalindrome(text) {
     return x.toLowerCase().split('').reverse().join('') == x.toLowerCase()
@@ -224,39 +269,57 @@ function isPalindrome(text) {
     testCases: [
       {
         input: ['Racecar'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['level'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['code'],
-        output: false,
+        expected: false,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['hello'],
-        output: false,
+        expected: false,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['Madam'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['DOQxkKXUUxkKXqOd'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['qJisnQQNsijq'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['F'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['EmEduYYTVF'],
-        output: false,
+        expected: false,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
     ],
     isFunction: true,
@@ -268,13 +331,13 @@ function isPalindrome(text) {
     description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และแปลงตัวอักษรทุกตัวในข้อความนั้นให้เป็นตัวพิมพ์ใหญ่
 ตัวอย่างที่ 1:
 Input: "javascript is fun"
-Output: "JAVASCRIPT IS FUN"
+expected: "JAVASCRIPT IS FUN"
 ตัวอย่างที่ 2:
 Input: "React"
-Output: "REACT"
+expected: "REACT"
 ตัวอย่างที่ 3:
 Input: "developer"
-Output: "DEVELOPER"
+expected: "DEVELOPER"
 `,
     solution: `function convertToUppercase(text) {
     return text.toUpperCase();
@@ -291,39 +354,57 @@ function convertToUppercase(text) {
     testCases: [
       {
         input: ['javascript is fun'],
-        output: 'JAVASCRIPT IS FUN',
+        expected: 'JAVASCRIPT IS FUN',
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['React'],
-        output: 'REACT',
+        expected: 'REACT',
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['developer'],
-        output: 'DEVELOPER',
+        expected: 'DEVELOPER',
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['hello'],
-        output: false,
+        expected: false,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['Madam'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['DOQxkKXUUxkKXqOd'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['qJisnQQNsijq'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['F'],
-        output: true,
+        expected: true,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
       {
         input: ['EmEduYYTVF'],
-        output: false,
+        expected: false,
+        matcher: TestCaseMatcherEnum.toBe,
+        not: false,
       },
     ],
     isFunction: true,
@@ -350,19 +431,19 @@ export const loopQuestions: SeedingQuestions = [
 
 Input: "banana", "a"
 
-Output: 3
+expected: 3
 
 ตัวอย่างที่ 2:
 
 Input: "hello world", "l"
 
-Output: 3
+expected: 3
 
 ตัวอย่างที่ 3:
 
 Input: "mississippi", "s"
 
-Output: 4
+expected: 4
 `,
     solution: `function countLetter(word,letter) {
     function countLetter(word,letter) {
@@ -384,28 +465,28 @@ function countLetter(word,letter) {
     /** Writing your code here */
 }
     `,
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: ['banana', 'a'],
-        output: 3,
+        expected: 3,
       },
       {
         input: ['hello world', 'l'],
-        output: 3,
+        expected: 3,
       },
       {
         input: ['Mississippi', 's'],
-        output: 4,
+        expected: 4,
       },
       {
         input: ['orange', 'a'],
-        output: 1,
+        expected: 1,
       },
       {
         input: ['apple', 'p'],
-        output: 2,
+        expected: 2,
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'countLetter',
   },
@@ -413,19 +494,19 @@ function countLetter(word,letter) {
     // SECOND QUESTION
     title: 'Fizz Buzz',
     description:
-      '\n  Given an integer n, return a string array answer (1-indexed) where:\n\nanswer[i] == "FizzBuzz" if i is divisible by 3 and 5.\nanswer[i] == "Fizz" if i is divisible by 3.\nanswer[i] == "Buzz" if i is divisible by 5.\nanswer[i] == i (as a string) if none of the above conditions are true.\n \n\nExample 1:\n\nInput: n = 3\nOutput: ["1","2","Fizz"]\nExample 2:\n\nInput: n = 5\nOutput: ["1","2","Fizz","4","Buzz"]\nExample 3:\n\nInput: n = 15\nOutput: ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]\n  ',
+      '\n  Given an integer n, return a string array answer (1-indexed) where:\n\nanswer[i] == "FizzBuzz" if i is divisible by 3 and 5.\nanswer[i] == "Fizz" if i is divisible by 3.\nanswer[i] == "Buzz" if i is divisible by 5.\nanswer[i] == i (as a string) if none of the above conditions are true.\n \n\nExample 1:\n\nInput: n = 3\nexpected: ["1","2","Fizz"]\nExample 2:\n\nInput: n = 5\nexpected: ["1","2","Fizz","4","Buzz"]\nExample 3:\n\nInput: n = 15\nexpected: ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]\n  ',
     solution:
-      'function fizzBuzz(numbers) {\n    const results = []\n    for(let i = 1; i <= numbers; i++) {\n        let output = ""\n        if(i % 3 === 0) output += "Fizz"\n\n        if(i % 5 === 0) output += "Buzz"\n\n        if(output.length === 0) output = i\n        \n        results.push(output)\n    }\n    return results\n}',
+      'function fizzBuzz(numbers) {\n    const results = []\n    for(let i = 1; i <= numbers; i++) {\n        let expected = ""\n        if(i % 3 === 0) expected += "Fizz"\n\n        if(i % 5 === 0) expected += "Buzz"\n\n        if(expected.length === 0) expected = i\n        \n        results.push(expected)\n    }\n    return results\n}',
     starterCode:
       '/**\n * Writing a logic inside the function\n * and return the result as an array\n * @param {Number} number\n * @return {Array<number | string>} results\n */\nfunction fizzBuzz(number) {\n    /**Writing your code here */\n}\n',
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: [10],
-        output: [1, 2, 'Fizz', 4, 'Buzz', 'Fizz', 7, 8, 'Fizz', 'Buzz'],
+        expected: [1, 2, 'Fizz', 4, 'Buzz', 'Fizz', 7, 8, 'Fizz', 'Buzz'],
       },
       {
         input: [15],
-        output: [
+        expected: [
           1,
           2,
           'Fizz',
@@ -445,7 +526,7 @@ function countLetter(word,letter) {
       },
       {
         input: [24],
-        output: [
+        expected: [
           1,
           2,
           'Fizz',
@@ -474,7 +555,7 @@ function countLetter(word,letter) {
       },
       {
         input: [30],
-        output: [
+        expected: [
           1,
           2,
           'Fizz',
@@ -507,7 +588,7 @@ function countLetter(word,letter) {
           'FizzBuzz',
         ],
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'fizzBuzz',
   },
@@ -516,7 +597,7 @@ function countLetter(word,letter) {
     title: 'Factorial',
     description: `เขียนฟังก์ชันที่รับตัวเลขจำนวนเต็มเป็น input และคำนวณค่า Factorial ของตัวเลขนั้น (ผลคูณของตัวเลขตั้งแต่ 1 ถึงตัวเลขนั้น)
 ตัวอย่าง Input: 5
-ตัวอย่าง Output: 120 (5 * 4 * 3 * 2 * 1)
+ตัวอย่าง expected: 120 (5 * 4 * 3 * 2 * 1)
 `,
     solution: `function factorial(number) {
     let result = 1
@@ -533,20 +614,20 @@ function factorial(number) {
     /** Writing your code here */
 }
 `,
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: [5],
-        output: 120,
+        expected: 120,
       },
       {
         input: [8],
-        output: 40320,
+        expected: 40320,
       },
       {
         input: [15],
-        output: 1307674368000,
+        expected: 1307674368000,
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'factorial',
   },
@@ -556,13 +637,13 @@ function factorial(number) {
     description: ` เขียนฟังก์ชันที่รับตัวเลขจำนวนเต็มเป็น input และตรวจสอบว่าเป็นจำนวนเฉพาะหรือไม่ จากนั้นให้แสดงผลลัพธ์เป็น true ถ้าเป็นจำนวนเฉพาะ และ false ถ้าไม่ใช่
 ตัวอย่างที่ 1:
 Input: 17
-Output: true
+expected: true
 ตัวอย่างที่ 2:
 Input: 8
-Output: false
+expected: false
 ตัวอย่างที่ 3:
 Input: 11
-Output: true
+expected: true
 `,
     solution: `function isPrime(number) {
   if(number <= 1) return false
@@ -582,44 +663,44 @@ Output: true
     /** Writing your code here */
 }
 `,
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: [17],
-        output: true,
+        expected: true,
       },
       {
         input: [8],
-        output: false,
+        expected: false,
       },
       {
         input: [11],
-        output: true,
+        expected: true,
       },
       {
         input: [18],
-        output: false,
+        expected: false,
       },
       {
         input: [143],
-        output: false,
+        expected: false,
       },
       {
         input: [64657551],
-        output: false,
+        expected: false,
       },
       {
         input: [64657553],
-        output: true,
+        expected: true,
       },
       {
         input: [0],
-        output: false,
+        expected: false,
       },
       {
         input: [1],
-        output: false,
+        expected: false,
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'isPrime',
   },
@@ -652,19 +733,19 @@ projects: จำนวนโปรเจคที่ทำเสร็จ (เ�
 
 Input: 100, 12
 
-Output: 100
+expected: 100
 
 ตัวอย่างที่ 2:
 
 Input: 99, 0
 
-Output: 100
+expected: 100
 
 ตัวอย่างที่ 3:
 
 Input: 10, 15
 
-Output: 100
+expected: 100
 `,
     solution: `function finalGrade (exam, projects) {
   let grade = 0
@@ -683,36 +764,36 @@ Output: 100
     function finalGrade (exam, projects) {
      /** Writing your code here */
 }`,
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: [100, 12],
-        output: 100,
+        expected: 100,
       },
       {
         input: [99, 0],
-        output: 100,
+        expected: 100,
       },
       {
         input: [10, 15],
-        output: 100,
+        expected: 100,
       },
       {
         input: [85, 5],
-        output: 90,
+        expected: 90,
       },
       {
         input: [55, 3],
-        output: 75,
+        expected: 75,
       },
       {
         input: [55, 0],
-        output: 0,
+        expected: 0,
       },
       {
         input: [20, 2],
-        output: 0,
+        expected: 0,
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'finalGrade',
   },
@@ -725,13 +806,13 @@ export const numberQuestions: SeedingQuestions = [
     description: ` เขียนฟังก์ชันที่รับอุณหภูมิเป็นองศาเซลเซียส (Celsius) เป็น input และแปลงเป็นองศาฟาเรนไฮต์ (Fahrenheit) โดยใช้สูตร: F = (C * 9/5) + 32
 ตัวอย่างที่ 1:
 Input: 25
-Output: 77
+expected: 77
 ตัวอย่างที่ 2:
 Input: 37
-Output: 98.6
+expected: 98.6
 ตัวอย่างที่ 3:
 Input: 40
-Output: 104
+expected: 104
 `,
     solution: `function convertTemp(degree) {
     return  (degree * 9 / 5) + 32
@@ -744,20 +825,20 @@ Output: 104
     /** Writing your code here */
 }
 `,
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: [25],
-        output: 77,
+        expected: 77,
       },
       {
         input: [37],
-        output: 98.6,
+        expected: 98.6,
       },
       {
         input: [40],
-        output: 104,
+        expected: 104,
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'convertTemp',
   },
@@ -767,13 +848,13 @@ Output: 104
     description: `รับค่าตัวเลขหนึ่งตัว และให้ return ค่าออกมาเป็น "Even" ถ้าตัวเลขนั้นเป็นเลขคู่ และ "Odd" ถ้าตัวเลขเป็นเลขคี่
 ตัวอย่างที่ 1:
 Input: 7
-Output: "Odd"
+expected: "Odd"
 ตัวอย่างที่ 2:
 Input: 8
-Output: "Even"
+expected: "Even"
 ตัวอย่างที่ 3:
 Input: -2
-Output: "Even"
+expected: "Even"
 `,
     solution: `function checkEvenOdd(number) {
   return number % 2 === 0 ? "Even" : "Odd"
@@ -787,28 +868,28 @@ Output: "Even"
     /** Writing your code here */
 }
 `,
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: [7],
-        output: 'Odd',
+        expected: 'Odd',
       },
       {
         input: [8],
-        output: 'Even',
+        expected: 'Even',
       },
       {
         input: [-2],
-        output: 'Even',
+        expected: 'Even',
       },
       {
         input: [144],
-        output: 'Even',
+        expected: 'Even',
       },
       {
         input: [577],
-        output: 'Odd',
+        expected: 'Odd',
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'checkEvenOdd',
   },
@@ -818,13 +899,13 @@ Output: "Even"
     description: `เขียนฟังก์ชันที่รับวินาทีเป็นจำนวนเต็ม แล้วแปลงเป็นเวลารูปแบบ ชั่วโมง:นาที:วินาที
 ตัวอย่างที่ 1:
 Input: 3661
-Output: "1:1:1"
+expected: "1:1:1"
 ตัวอย่างที่ 2:
 Input: 75
-Output: "0:1:15"
+expected: "0:1:15"
 ตัวอย่างที่ 3:
 Input: 12345
-Output: "3:25:45"
+expected: "3:25:45"
 `,
     solution: `function convertSecondsToTime(seconds) { 
   const hours = Math.floor(seconds / 3600);
@@ -843,36 +924,36 @@ Output: "3:25:45"
     /** Writing your code here */
 }
 `,
-    testCases: [
+    testCases: generateSeedingTestCase([
       {
         input: [3661],
-        output: '1:1:1',
+        expected: '1:1:1',
       },
       {
         input: [75],
-        output: '0:1:15',
+        expected: '0:1:15',
       },
       {
         input: [12345],
-        output: '3:25:45',
+        expected: '3:25:45',
       },
       {
         input: [5768],
-        output: '1:36:8',
+        expected: '1:36:8',
       },
       {
         input: [56789],
-        output: '15:46:29',
+        expected: '15:46:29',
       },
       {
         input: [1],
-        output: '0:0:1',
+        expected: '0:0:1',
       },
       {
         input: [61],
-        output: '0:1:1',
+        expected: '0:1:1',
       },
-    ],
+    ]),
     isFunction: true,
     variableName: 'convertSecondsToTime',
   },
