@@ -45,7 +45,7 @@ console.log('Loading env file from:', envPath);
     CustomValidatorModule,
     AuthModule,
     ExecutesModule,
-    env === 'development' ? SeedsModule : null,
+    // env === 'development' ? SeedsModule : null,
   ],
   controllers: [HealthcheckController, AuthController],
   providers: [AuthService],
