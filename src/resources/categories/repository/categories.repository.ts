@@ -68,10 +68,19 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     return CategoryMapper.toDomain(categoryObj);
   }
 
-  async findById<T>(id: Category['id']): Promise<Category<T>> {
-    const categoryObj = await this.categoryModel
-      .findById(id)
-      .populate(CategorySchemaClass.questionsPopulatePath, '_id title');
+  async findById<T>(
+    id: Category['id'],
+    includeQuestions: boolean,
+  ): Promise<Category<T>> {
+    const query = this.categoryModel.findById(id);
+
+    if (includeQuestions)
+      query.populate(
+        CategorySchemaClass.questionsPopulatePath,
+        '_id title createdAt updatedAt deletedAt',
+      );
+
+    const categoryObj = await query;
 
     return CategoryMapper.toDomain(categoryObj);
   }

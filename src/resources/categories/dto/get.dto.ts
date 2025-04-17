@@ -27,7 +27,24 @@ export class GetManyCategoriesResponse extends CoreApiResponse<
   data: Category[];
 }
 
-export class GetByIdCategoriesResponse extends CoreApiResponse<
+export class GetCategoryByIdResponse extends CoreApiResponse<
+  Omit<Category, 'questions'>
+> {
+  @ApiProperty({
+    type: [Category],
+    example: {
+      id: '67fcc1ad3dfd9aaccee326aa',
+      createdAt: '4/14/2025, 3:05:01 PM',
+      updatedAt: '4/14/2025, 3:05:01 PM',
+      deletedAt: null,
+      name: 'Conditional',
+      isChallenge: false,
+    },
+  })
+  data: Omit<Category, 'questions'>;
+}
+
+export class GetCategoryByIdIncludeQuestionsResponse extends CoreApiResponse<
   Category<QuestionInCategoryList>
 > {
   @ApiProperty({
@@ -75,7 +92,7 @@ export class GetMyCategoriesResponse extends CoreApiResponse<MyCategory[]> {
   data: MyCategory[];
 }
 
-export class GetCategoryByIdAndMe extends CoreApiResponse<
+export class GetCategoryByIdIncludeQuestionsAndMe extends CoreApiResponse<
   Category<QuestionAndSolveStatus>
 > {
   @ApiProperty({

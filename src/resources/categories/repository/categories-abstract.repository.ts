@@ -8,7 +8,10 @@ import { User } from 'src/resources/users/domain/user.domain';
 import { CategoriesQueriesOption } from '../dto/get.dto';
 
 export abstract class CategoriesRepository extends Repository<Category> {
-  abstract override findById<T>(id: string): Promise<Category<T>>;
+  abstract override findById<T>(
+    id: string,
+    includeQuestions: boolean,
+  ): Promise<Category<T>>;
   abstract override findMany(
     options?: CategoriesQueriesOption,
   ): Promise<Category[]>;

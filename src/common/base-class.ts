@@ -3,7 +3,7 @@ export abstract class Service<T extends { id: string }> {
 
   abstract getMany(): Promise<T[]>;
 
-  abstract getById(id: T['id']): Promise<T>;
+  abstract getById(id: T['id'], ...args: any[]): Promise<T>;
 
   abstract update(data: Partial<Omit<T, 'id'>>, id: T['id']): Promise<T>;
 }

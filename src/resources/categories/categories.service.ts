@@ -62,9 +62,12 @@ export class CategoriesService
     return this.categoriesRepository.create(data);
   }
 
-  getById<T>(id: Category['id']): Promise<Category<T>> {
+  getById<T>(
+    id: Category['id'],
+    includeQuestions: boolean = false,
+  ): Promise<Category<T>> {
     IDValidator(id, 'Category');
-    return this.categoriesRepository.findById<T>(id);
+    return this.categoriesRepository.findById<T>(id, includeQuestions);
   }
 
   getMany(options: CategoriesQueriesOption = {}): Promise<Category[]> {
@@ -92,8 +95,10 @@ export class CategoriesService
   async update(data: UpdateCategoryDto): Promise<Category> {
     const { categoryId, ...rest } = data;
 
-    const isCategoryExist =
-      await this.categoriesRepository.findById(categoryId);
+    const isCategoryExist = await this.categoriesRepository.findById(
+      categoryId,
+      false,
+    );
 
     if (!isCategoryExist) throw ErrorApiResponse.notFound('ID', categoryId);
 

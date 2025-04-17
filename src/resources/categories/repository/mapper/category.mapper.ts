@@ -17,7 +17,7 @@ type QuestionDetailInCategorySchema = {
 };
 
 export class CategoryMapper {
-  public static toDomain<T = string>(
+  public static toDomain<T = string[]>(
     documentEntity: CategorySchemaClass,
   ): Category<T> {
     // If there are no document entity provided, return null

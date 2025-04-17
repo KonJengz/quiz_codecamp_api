@@ -27,20 +27,6 @@ export class QuestionDocumentRepository implements QuestionRepository {
     QuestionSchemaClass.testCaseJoinField,
   ];
 
-  private mockQuestion = new Question({
-    id: '',
-    variableName: '',
-    category: { id: '', isChallenge: false, name: '' },
-    testCases: [],
-    title: '',
-    createdAt: '',
-    updatedAt: '',
-    deletedAt: '',
-    description: '',
-    solution: '',
-    starterCode: '',
-  });
-
   async create(data: CreateQuestionDto): Promise<Question> {
     const { testCases, ...rest } = data;
 
@@ -81,7 +67,18 @@ export class QuestionDocumentRepository implements QuestionRepository {
 
   async findMany(): Promise<Question[]> {
     const questions = await this.questionModel
-      .find()
+      .find(
+        {
+          deletedAt: null,
+        },
+        {
+          id: true,
+          title: true,
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+        },
+      )
       .populate(this.questionPopulateOption);
     // If there are no questions, return []
     if (questions.length === 0) return [];
@@ -132,10 +129,15 @@ export class QuestionDocumentRepository implements QuestionRepository {
     return QuestionMapper.toDomainWithSubmission(questions, submissions[0]);
   }
 
-  update<U extends Partial<Omit<Question, 'id'>>>(
+  async update<U extends Partial<Omit<Question, 'id'>>>(
     data: U,
     id: string,
   ): Promise<Question> {
-    return Promise.resolve(this.mockQuestion);
+    const updatedQuestion = await this.questionModel.findByIdAndUpdate(
+      id,
+      data,
+    );
+
+    return QuestionMapper.toDomain(updatedQuestion);
   }
 }

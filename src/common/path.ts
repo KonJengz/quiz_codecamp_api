@@ -32,7 +32,8 @@ export const categoriesPath = {
     isChallenge: 'cha',
   },
   paramId: CATEGORIES_PATH.paramId,
-  getByIdAndMe: `:${CATEGORIES_PATH.paramId}/${ME}`,
+  getByIdAndQuestions: `:${CATEGORIES_PATH.paramId}/questions/`,
+  getByIdAndQuestionsIncludeMe: `:${CATEGORIES_PATH.paramId}/questions/${ME}`,
 };
 
 export const questionsPath = {

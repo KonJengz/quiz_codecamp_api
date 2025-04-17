@@ -16,7 +16,12 @@ import { CodeAssertionService } from './assertion.service';
 
 export enum TestCaseMatcherEnum {
   toBe = 'toBe',
+  toBeStr = 'to be',
   toBeDeepEqual = 'toBeDeepEqual',
+  toBeDeepEqualStr = 'to be deep equal',
+  toHaveType = 'toHaveType',
+  toHaveTypeStr = 'to have type',
+  not = 'not',
 }
 
 type TestResultType = {

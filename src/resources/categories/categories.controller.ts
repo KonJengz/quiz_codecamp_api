@@ -14,8 +14,9 @@ import { CategoriesService } from './categories.service';
 import { Category, QuestionInCategoryList } from './domain/categories.domain';
 import {
   CategoriesQueriesOption,
-  GetByIdCategoriesResponse,
-  GetCategoryByIdAndMe,
+  GetCategoryByIdIncludeQuestionsAndMe,
+  GetCategoryByIdIncludeQuestionsResponse,
+  GetCategoryByIdResponse,
   GetManyCategoriesResponse,
   GetMyCategoriesResponse,
 } from './dto/get.dto';
@@ -81,18 +82,36 @@ export class CategoriesController {
   }
 
   @ApiParam({ name: categoriesPath.paramId, required: true })
-  @ApiOkResponse({ type: GetByIdCategoriesResponse })
+  @ApiOkResponse({ type: GetCategoryByIdResponse })
   @Get(`:${categoriesPath.paramId}`)
   async getById(
     @Param(categoriesPath.paramId) id: Category['id'],
-  ): Promise<GetByIdCategoriesResponse> {
+  ): Promise<GetCategoryByIdResponse> {
     // This is definitely not the best way
     // to make sure that category is correct type --> Category<QuestionInCategoryList>
     // but to not fix a lot of code base
     // we make sure that this will be Category<QuestionInCategoryList>
     const category =
-      await this.categoriesService.getById<QuestionInCategoryList>(id);
-    return GetByIdCategoriesResponse.getSuccess(
+      await this.categoriesService.getById<QuestionInCategoryList>(id, false);
+    return GetCategoryByIdResponse.getSuccess(
+      `${categoriesPath.base}/${id}`,
+      category,
+    );
+  }
+
+  @ApiParam({ name: categoriesPath.paramId, required: true })
+  @ApiOkResponse({ type: GetCategoryByIdIncludeQuestionsResponse })
+  @Get(categoriesPath.getByIdAndQuestions)
+  async getByIdAndQuestions(
+    @Param(categoriesPath.paramId) id: Category['id'],
+  ): Promise<GetCategoryByIdIncludeQuestionsResponse> {
+    // This is definitely not the best way
+    // to make sure that category is correct type --> Category<QuestionInCategoryList>
+    // but to not fix a lot of code base
+    // we make sure that this will be Category<QuestionInCategoryList>
+    const category =
+      await this.categoriesService.getById<QuestionInCategoryList>(id, true);
+    return GetCategoryByIdIncludeQuestionsResponse.getSuccess(
       `${categoriesPath.base}/${id}`,
       category,
     );
@@ -100,19 +119,19 @@ export class CategoriesController {
 
   @ApiBearerAuth()
   @ApiParam({ name: categoriesPath.paramId })
-  @ApiOkResponse({ type: GetCategoryByIdAndMe })
+  @ApiOkResponse({ type: GetCategoryByIdIncludeQuestionsAndMe })
   @UseGuards(AccessTokenAuthGuard)
-  @Get(categoriesPath.getByIdAndMe)
-  async getByIdAndMe(
+  @Get(categoriesPath.getByIdAndQuestionsIncludeMe)
+  async getByIdAndQuestionIncludeMe(
     @Param(categoriesPath.paramId) id: Category['id'],
     @Req() req: HttpRequestWithUser,
-  ): Promise<GetCategoryByIdAndMe> {
+  ): Promise<GetCategoryByIdIncludeQuestionsAndMe> {
     const categoryAndMyQuestionList = await this.categoriesService.getByIdAndMe(
       id,
       req.user.userId,
     );
 
-    return GetCategoryByIdAndMe.getSuccess(
+    return GetCategoryByIdIncludeQuestionsAndMe.getSuccess(
       `${categoriesPath.base}/${id}/${ME}`,
       categoryAndMyQuestionList,
     );
