@@ -27,9 +27,9 @@ export class CategoriesService
   }
 
   async onModuleInit() {
-    if (!process.env.NODE_ENV.includes('development')) {
-      return;
-    }
+    // if (!process.env.NODE_ENV.includes('development')) {
+    //   return;
+    // }
 
     try {
       const count = await this.categoriesRepository.count();
