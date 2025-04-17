@@ -24,6 +24,7 @@ import { SeedsModule } from './utils/seeds/seeds.module';
 
 const env = process.env.NODE_ENV || '';
 const envPath = join(process.cwd(), `.env.${env}`);
+console.log('environment = ', env);
 console.log('Loading env file from:', envPath);
 
 @Module({
