@@ -43,6 +43,8 @@ export class TestResultDetail {
   matcher: TestCaseMatcherEnum;
   @ApiProperty({ type: Number })
   not: boolean;
+  @ApiProperty({ type: [String], nullable: true })
+  input: unknown[];
   @ApiProperty({ type: String, nullable: true })
   error?: string;
 }

@@ -30,6 +30,7 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
   ): Promise<Submission> {
     const createdSubmission = new this.submissionModel(data);
     await createdSubmission.save();
+
     return SubmissionMapper.toDomain(createdSubmission);
   }
 
@@ -58,7 +59,7 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
     const upsertPipeline = [
       {
         $set: {
-          codePipeline,
+          ...codePipeline,
           status: {
             $cond: [
               { $eq: ['$status', SubmissionStatusEnum.PASSED] },
@@ -66,6 +67,11 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
               data.status,
             ],
           },
+          // seed createdAt on insert only
+          createdAt: { $ifNull: ['$createdAt', new Date()] },
+
+          // always bump updatedAt
+          updatedAt: new Date(),
         },
       },
     ];
@@ -78,7 +84,7 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
       // Passing update pipeline for
       // control update flow.
       upsertPipeline,
-      { new: true, upsert: true },
+      { new: true, upsert: true, setDefaultsOnInsert: true, timestamps: false },
     );
 
     const returnSubmission = upsertedSubmission.$clone();
