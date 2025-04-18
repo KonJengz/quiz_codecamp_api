@@ -15,6 +15,7 @@ import { User } from '../users/domain/user.domain';
 import { CategoriesQueriesOption } from './dto/get.dto';
 import { Question } from '../questions/domain/question.domain';
 import { IDValidator } from 'src/utils/IDValidatior';
+import { NullAble } from 'src/common/types/types';
 
 @Injectable()
 export class CategoriesService
@@ -62,9 +63,12 @@ export class CategoriesService
     return this.categoriesRepository.create(data);
   }
 
-  getById<T>(id: Category['id']): Promise<Category<T>> {
+  getById<T>(
+    id: Category['id'],
+    includeQuestions: boolean = false,
+  ): Promise<Category<T>> {
     IDValidator(id, 'Category');
-    return this.categoriesRepository.findById<T>(id);
+    return this.categoriesRepository.findById<T>(id, includeQuestions);
   }
 
   getMany(options: CategoriesQueriesOption = {}): Promise<Category[]> {
@@ -92,11 +96,27 @@ export class CategoriesService
   async update(data: UpdateCategoryDto): Promise<Category> {
     const { categoryId, ...rest } = data;
 
-    const isCategoryExist =
-      await this.categoriesRepository.findById(categoryId);
+    const isCategoryExist = await this.categoriesRepository.findById(
+      categoryId,
+      false,
+    );
 
     if (!isCategoryExist) throw ErrorApiResponse.notFound('ID', categoryId);
 
     return this.categoriesRepository.update(rest, categoryId);
+  }
+
+  async updateStatus(id: Category['id']): Promise<Category> {
+    IDValidator(id, 'Category');
+
+    const category = await this.categoriesRepository.findById(id, false);
+
+    if (!category) throw ErrorApiResponse.notFound('ID', id, 'Category');
+
+    const data: { deletedAt: NullAble<Date> } = { deletedAt: null };
+
+    if (!category.deletedAt) data.deletedAt = new Date(Date.now());
+
+    return this.categoriesRepository.update(data, id);
   }
 }

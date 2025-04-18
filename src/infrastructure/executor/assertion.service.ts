@@ -58,17 +58,44 @@ export class CodeAssertionService {
 }
 `;
 
+  public static baseHaveType = `
+  function isHaveType(actual, expectType) {
+    return typeof actual === expectType
+  }
+  `;
+
   public static toBe = `
-        result.passed = isToBe(expected,actual) 
+  function toBe(not = false) {
+    let passed =isToBe(expected,actual) 
+
+    if(not) passed = !passed
+
+    return passed 
+  }
         `;
 
   public static toBeDeepEqual = `
-    const passed = deepEqual(expected,actual)
-
+  function toBeDeepEqual(not = false) {
+    let passed = deepEqual(expected,actual)
+    
     if(!passed) {
-        result.error = ${CodeAssertionService.formatFailedAssertionStr}
+      result.error = ${CodeAssertionService.formatFailedAssertionStr}
     }
-    result.passed = passed
+
+    if(not) passed = !passed
+
+    return passed 
+  }
+  `;
+
+  public static toHaveType = `
+  function toHaveType(not = false) {
+    let passed = isHaveType(actual,expected) 
+
+    if(not) passed = !passed
+
+    return passed
+  }
   `;
 
   public static setupAssertionFramework = (
@@ -76,36 +103,124 @@ export class CodeAssertionService {
   ): string => `
     ${CodeAssertionService.baseIsToBe}
     ${CodeAssertionService.baseDeepEqual}
-
+    ${CodeAssertionService.baseHaveType}
 
     function expect(actual) {
       let passed;
+
       const result = {
         passed,
         detail: {
-          actual,
+          actual:  actual,
           expected: '',
+          describe: "",
         },
         error: null,
       };
       return {
-        ${matcherEnum.toBe}: (expected) => {
-          result.detail.expected = expected;
-          ${CodeAssertionService.toBe};
-          return result;
-        },
-        ${matcherEnum.toBeDeepEqual}: (expected) => {
-          result.detail.expected = expected;
-          ${CodeAssertionService.toBeDeepEqual};
-          return result;
-        },
+           ${CodeAssertionService.allMatcher(matcherEnum, false)},
+            ${matcherEnum.not}: () => ({ 
+              ${CodeAssertionService.allMatcher(matcherEnum, true)}
+            })
       };
     }
     `;
 
+  private static allMatcher(
+    matcherEnum: typeof TestCaseMatcherEnum,
+    not = false,
+  ): string {
+    const notText = `${not ? ' not ' : ' '}`;
+
+    const matcherArr: {
+      key: TestCaseMatcherEnum;
+      func: string;
+      verb: string;
+    }[] = [
+      {
+        key: matcherEnum.toBe,
+        func: CodeAssertionService.toBe,
+        verb: TestCaseMatcherEnum.toBeStr,
+      },
+      {
+        key: matcherEnum.toBeDeepEqual,
+        func: CodeAssertionService.toBeDeepEqual,
+        verb: TestCaseMatcherEnum.toBeDeepEqualStr,
+      },
+      {
+        key: matcherEnum.toHaveType,
+        func: CodeAssertionService.toHaveType,
+        verb: TestCaseMatcherEnum.toHaveTypeStr,
+      },
+    ];
+
+    return matcherArr
+      .map(
+        ({ func, key, verb }) => `["${key}"] : (expected) => {
+      result.detail.expected = expected;
+      result.passed = (${func})(${not});
+      result.detail.not = ${not};
+      result.detail.matcher = "${key}";
+    if (!result.passed) {
+      result.error = ${CodeAssertionService.formatFailedAssertionStr};
+    }
+    result.describe = "expect " + result.detail.actual + "${notText}${verb} " + expected
+
+
+    return result;
+    }`,
+      )
+      .join(', \n');
+
+    //   [${matcherEnum.toBe}]: (expected) => {
+    //     result.detail.expected = expected;
+    //     result.passed = ${CodeAssertionService.toBe}(${not});
+    //     if (!result.passed) {
+    //       result.error = ${CodeAssertionService.formatFailedAssertionStr};
+    //     }
+    //     result.describe = "expect " + actual + "to${not ? ' not ' : ' '} ${matcherEnum.toBeStr} " + expected
+
+    //     ${not ? 'result.not = true' : ''}
+
+    //     return result;
+    //   },
+    //   [${matcherEnum.toBeDeepEqual}]: (expected) => {
+    //     result.detail.expected = expected;
+    //     result.passed = ${CodeAssertionService.toBeDeepEqual}(${not});
+    //     result.describe = \`expect \$\{actual} to${not ? ' not ' : ' '}${matcherEnum.toBeDeepEqualStr} \$\{expected} \`
+    //     if (!result.passed) {
+    //       result.error = ${CodeAssertionService.formatFailedAssertionStr};
+    //     }
+
+    //     return result;
+    //   },
+    //     [${matcherEnum.toHaveType}]: (expected) => {
+    //     result.detail.expected = expected;
+    //     result.passed = ${CodeAssertionService.toHaveType}(${not});
+    //     result.describe = \`expect \$\{actual} to${not ? ' not ' : ' '}${matcherEnum.toBeDeepEqualStr} \$\{expected} \`
+    //     if (!result.passed) {
+    //       result.error = ${CodeAssertionService.formatFailedAssertionStr};
+    //     }
+
+    //     return result;
+    //   },
+    // `;
+  }
+
   public static generateAssertionCode(testCase: ITestCase, actual: unknown) {
-    if (typeof testCase.expected === 'object')
-      testCase.expected = JSON.stringify(testCase.expected);
-    return `expect(${actual}).${testCase.matcher}(${testCase.expected})`;
+    let { expected, expect, matcher, not } = testCase;
+
+    if (expect) {
+      actual = expect;
+    }
+
+    // actual = JSON.stringify(actual);
+    if (typeof expected === 'object') {
+      expected = JSON.stringify(expected);
+    } else if (typeof expected === 'string') {
+      // Wrap string values in quotes
+      expected = `"${expected}"`;
+    }
+    return `expect(${actual}).${not ? `${TestCaseMatcherEnum.not}().` : ''}${matcher}(${expected})`;
   }
 }

@@ -20,6 +20,7 @@ import {
 } from 'src/utils/seeds/data/questions-related-data.seed';
 import { CategoriesQueriesOption } from '../dto/get.dto';
 import { Question } from 'src/resources/questions/domain/question.domain';
+import { MongoRepositoryHelper } from 'src/infrastructure/persistence/config/mongodb/mongo.repository';
 
 export type MyCategoryQueried = CategorySchemaClass & {
   solvedQuestions: Types.ObjectId[];
@@ -68,10 +69,19 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
     return CategoryMapper.toDomain(categoryObj);
   }
 
-  async findById<T>(id: Category['id']): Promise<Category<T>> {
-    const categoryObj = await this.categoryModel
-      .findById(id)
-      .populate(CategorySchemaClass.questionsPopulatePath, '_id title');
+  async findById<T>(
+    id: Category['id'],
+    includeQuestions: boolean,
+  ): Promise<Category<T>> {
+    const query = this.categoryModel.findById(id);
+
+    if (includeQuestions)
+      query.populate(
+        CategorySchemaClass.questionsPopulatePath,
+        '_id title createdAt updatedAt deletedAt',
+      );
+
+    const categoryObj = await query;
 
     return CategoryMapper.toDomain(categoryObj);
   }
@@ -114,8 +124,25 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
         {
           $lookup: {
             from: QuestionSchemaClass.actualCollectionName,
-            localField: '_id',
-            foreignField: 'categoryId',
+            // localField: '_id',
+            // foreignField: 'categoryId',
+            let: { categoryId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {
+                        $eq: ['$categoryId', '$$categoryId'],
+                      },
+                      {
+                        $eq: ['$deletedAt', null],
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
             as: 'questions',
           },
         },
@@ -197,8 +224,25 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
       {
         $lookup: {
           from: QuestionSchemaClass.actualCollectionName,
-          localField: '_id',
-          foreignField: 'categoryId',
+          // localField: '_id',
+          // foreignField: 'categoryId',
+          let: { categoryId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ['$categoryId', '$$categoryId'],
+                    },
+                    {
+                      $eq: ['$deletedAt', null],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
           as: 'questions',
         },
       },
@@ -256,6 +300,7 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
                   false,
                 ],
               },
+              deletedAt: '$questions.deletedAt',
             },
           },
         },
@@ -290,8 +335,9 @@ export class CategoriesDocumentRepository implements CategoriesRepository {
   private filterOptions(
     options: CategoriesQueriesOption,
   ): mongoose.RootFilterQuery<CategorySchemaClass> {
-    const { isChallenge } = options;
-    const filter: mongoose.RootFilterQuery<CategorySchemaClass> = {};
+    const { isChallenge, status } = options;
+    const filter: mongoose.RootFilterQuery<CategorySchemaClass> =
+      MongoRepositoryHelper.statusFilter<CategorySchemaClass>(status);
 
     if (!isChallenge) return filter;
     switch (isChallenge) {

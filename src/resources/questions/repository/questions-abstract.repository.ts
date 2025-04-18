@@ -4,20 +4,24 @@ import { NullAble } from 'src/common/types/types';
 import { CreateQuestionDto } from '../dto/create-question.dto';
 import { Category } from 'src/resources/categories/domain/categories.domain';
 import { User } from 'src/resources/users/domain/user.domain';
+import { DomainQueryTypes } from 'src/common/types/products-shared.type';
 
 export abstract class QuestionRepository {
   abstract create(data: CreateQuestionDto): Promise<Question>;
 
   abstract findById(id: Question['id']): Promise<NullAble<Question>>;
 
-  abstract findMany(): Promise<Array<Question>>;
+  abstract findMany(options: DomainQueryTypes): Promise<Array<Question>>;
 
   abstract update<U extends Partial<Omit<Question, 'id'>>>(
     data: U,
     id: Question['id'],
   ): Promise<Question>;
   abstract findByTitle(title: Question['title']): Promise<NullAble<Question>>;
-  abstract findByCategoryId(categoryId: Category['id']): Promise<Question[]>;
+  abstract findByCategoryId(
+    categoryId: Category['id'],
+    options: DomainQueryTypes,
+  ): Promise<Question[]>;
 
   abstract findByIdAndUserSubmission(
     id: Question['id'],

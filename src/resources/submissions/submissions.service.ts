@@ -35,8 +35,6 @@ export class SubmissionsService extends Service<Submission> {
     super();
   }
 
-  private executeCode() {}
-
   override async create(
     data: CreateSubmissionInput,
   ): Promise<Submission & { testResults: AllTestsResult }> {
@@ -52,15 +50,18 @@ export class SubmissionsService extends Service<Submission> {
         `The question ID: ${isQuestionsExist} does not have any test case. Please contact developer to adding test case before submitting.`,
       );
 
-    const isFunction = this.validateUserSubmissionCode(
-      data.code,
-      isQuestionsExist,
-    );
+    // Validate user input code
+    // before proceeds any further
+    // If the user code syntax does not match with the question.
+    this.validateUserSubmissionCode(data.code, isQuestionsExist);
 
     const resultObj = await this.runUserCodeWithTest(
       data.code,
       isQuestionsExist.testCases,
-      { isFunction, variableName: isQuestionsExist.variableName },
+      {
+        isFunction: isQuestionsExist.isFunction,
+        variableName: isQuestionsExist.variableName,
+      },
     );
 
     const testResults = this.resolveTestResults(resultObj);
@@ -107,7 +108,10 @@ export class SubmissionsService extends Service<Submission> {
   ): Promise<SubmittedCodeResult> {
     const { isFunction, variableName } = questionDetail;
 
-    const genTestCases = this.codeExecutorService.generateTestCase(testCases);
+    const genTestCases = this.codeExecutorService.generateTestCase(
+      testCases,
+      variableName,
+    );
 
     return this.codeExecutorService.submit(userCode, genTestCases, {
       isFunction,
@@ -126,19 +130,14 @@ export class SubmissionsService extends Service<Submission> {
   private validateUserSubmissionCode(
     code: CreateSubmissionInput['code'],
     question: Question,
-  ): boolean {
+  ): void {
     // Checking if the user code include function in it?
     const isFunction = this.codeExecutorService.validateFunctionSyntax(code);
 
-    // Does starter code include function?
-    const isQuestionFunc = this.codeExecutorService.validateFunctionSyntax(
-      question.starterCode,
-    );
-
-    if (isFunction !== isQuestionFunc) {
-      let codeType = !isQuestionFunc ? 'non-function' : 'function';
+    if (isFunction !== question.isFunction) {
+      let codeType = !question.isFunction ? 'non-function' : 'function';
       throw ErrorApiResponse.badRequest(
-        `The question require ${codeType} code but provide a code as a ${codeType}`,
+        `The question require ${codeType} code but provide a code as a ${isFunction}`,
       );
     }
 
@@ -149,7 +148,7 @@ export class SubmissionsService extends Service<Submission> {
 
     if (!isValid) throw ErrorApiResponse.badRequest(errMsg);
 
-    return isQuestionFunc;
+    return;
   }
 
   private resolveTestResults(results: SubmittedCodeResult): AllTestsResult {

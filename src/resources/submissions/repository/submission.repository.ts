@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Submission, SubmissionStatusEnum } from '../domain/submission.domain';
 import { SubmissionSchemaClass } from './entities/submissions.entity';
 import { SubmissionRepository } from './submissions-abstract.repository';
@@ -36,16 +36,54 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
   public async upsert(
     data: Omit<Submission, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Submission> {
+    // We make pipeline for updating the data first,
+    // If there are already a submission but status === PASSED
+    // We don't update the status and code
+    const upsertPipeline = [
+      {
+        $set: {
+          code: {
+            $cond: [
+              { $eq: ['$status', SubmissionStatusEnum.PASSED] },
+              '$code',
+              data.code,
+            ],
+          },
+          status: {
+            $cond: [
+              { $eq: ['$status', SubmissionStatusEnum.PASSED] },
+              '$status',
+              data.status,
+            ],
+          },
+        },
+      },
+    ];
+
     const upsertedSubmission = await this.submissionModel.findOneAndUpdate(
       {
         userId: data.userId,
         questionId: data.questionId,
       },
-      data,
+      // Passing update pipeline for
+      // control update flow.
+      upsertPipeline,
       { new: true, upsert: true },
     );
 
-    return SubmissionMapper.toDomain(upsertedSubmission);
+    const returnSubmission = upsertedSubmission.$clone();
+
+    if (
+      upsertedSubmission.status === SubmissionStatusEnum.PASSED &&
+      upsertedSubmission.code !== data.code
+    ) {
+      returnSubmission.code = data.code;
+
+      if (data.status !== upsertedSubmission.status)
+        returnSubmission.status = data.status;
+    }
+
+    return SubmissionMapper.toDomain(returnSubmission);
   }
 
   findById(id: string): Promise<Submission> {

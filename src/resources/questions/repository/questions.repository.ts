@@ -11,6 +11,8 @@ import { Category } from 'src/resources/categories/domain/categories.domain';
 import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
 import { User } from 'src/resources/users/domain/user.domain';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
+import { DomainQueryTypes } from 'src/common/types/products-shared.type';
+import { MongoRepositoryHelper } from 'src/infrastructure/persistence/config/mongodb/mongo.repository';
 
 @Injectable()
 export class QuestionDocumentRepository implements QuestionRepository {
@@ -27,20 +29,6 @@ export class QuestionDocumentRepository implements QuestionRepository {
     QuestionSchemaClass.testCaseJoinField,
   ];
 
-  private mockQuestion = new Question({
-    id: '',
-    variableName: '',
-    category: { id: '', isChallenge: false, name: '' },
-    testCases: [],
-    title: '',
-    createdAt: '',
-    updatedAt: '',
-    deletedAt: '',
-    description: '',
-    solution: '',
-    starterCode: '',
-  });
-
   async create(data: CreateQuestionDto): Promise<Question> {
     const { testCases, ...rest } = data;
 
@@ -53,7 +41,7 @@ export class QuestionDocumentRepository implements QuestionRepository {
       testCases,
     });
     await createdQuestion.save();
-    // Update the category to have newly created question
+    // // Update the category to have newly created question
     await this.categoryModel.findByIdAndUpdate(createdQuestion.categoryId, {
       $push: { questions: createdQuestion._id },
     });
@@ -79,9 +67,17 @@ export class QuestionDocumentRepository implements QuestionRepository {
     return QuestionMapper.toDomain(question, true);
   }
 
-  async findMany(): Promise<Question[]> {
+  async findMany(options: DomainQueryTypes): Promise<Question[]> {
+    const filter = MongoRepositoryHelper.statusFilter(options.status);
+
     const questions = await this.questionModel
-      .find()
+      .find(filter, {
+        id: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      })
       .populate(this.questionPopulateOption);
     // If there are no questions, return []
     if (questions.length === 0) return [];
@@ -132,10 +128,17 @@ export class QuestionDocumentRepository implements QuestionRepository {
     return QuestionMapper.toDomainWithSubmission(questions, submissions[0]);
   }
 
-  update<U extends Partial<Omit<Question, 'id'>>>(
+  async update<U extends Partial<Omit<Question, 'id'>>>(
     data: U,
     id: string,
   ): Promise<Question> {
-    return Promise.resolve(this.mockQuestion);
+    console.log(data);
+    const updatedQuestion = await this.questionModel.findByIdAndUpdate(
+      id,
+      data,
+      { new: true },
+    );
+
+    return QuestionMapper.toDomain(updatedQuestion);
   }
 }

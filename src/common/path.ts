@@ -5,6 +5,7 @@ const CATEGORIES_PATH = {
   paramId: 'categoryId',
 };
 const QUESTIONS_PATH = { base: 'questions', paramId: 'questionId' };
+const TESTCASES_PATH = { base: 'test-cases' };
 const SUBMISSIONS_PATH = 'submissions';
 const HEALTH_PATH = 'healthcheck';
 const EXECUTE_PATH = 'executes';
@@ -32,7 +33,9 @@ export const categoriesPath = {
     isChallenge: 'cha',
   },
   paramId: CATEGORIES_PATH.paramId,
-  getByIdAndMe: `:${CATEGORIES_PATH.paramId}/${ME}`,
+  getByIdAndQuestions: `:${CATEGORIES_PATH.paramId}/questions/`,
+  getByIdAndQuestionsIncludeMe: `:${CATEGORIES_PATH.paramId}/questions/${ME}`,
+  updateStatus: `:${CATEGORIES_PATH.paramId}/status`,
 };
 
 export const questionsPath = {
@@ -42,6 +45,7 @@ export const questionsPath = {
   paramId: QUESTIONS_PATH.paramId,
   category: `${categoriesPath.base}/:${categoriesPath.paramId}`,
   categoryParam: `${categoriesPath.paramId}`,
+  updateStatus: `:${QUESTIONS_PATH.paramId}/status`,
 };
 
 export const submissionsPath = {
@@ -50,4 +54,9 @@ export const submissionsPath = {
 
 export const executesPath = {
   base: EXECUTE_PATH,
+};
+
+export const testCasesPath = {
+  base: TESTCASES_PATH.base,
+  matchers: `matchers`,
 };

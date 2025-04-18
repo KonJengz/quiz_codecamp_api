@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BaseDomain } from 'src/common/base-domain';
 import { Question } from 'src/resources/questions/domain/question.domain';
 
-export class Category<TQuestions = string> extends BaseDomain {
+export class Category<TQuestions = string[]> extends BaseDomain {
   @ApiProperty({ type: String, example: 'Array' })
   name: string;
   @ApiProperty({ type: Boolean, example: 'false' })
   isChallenge: boolean;
 
   @ApiProperty({ type: [String], example: [''] })
-  questions: TQuestions[];
+  questions: TQuestions;
 
   constructor({
     id,
@@ -39,7 +39,7 @@ export class QuestionAndSolveStatus extends QuestionInCategoryList {
   public isSolved: boolean;
 }
 
-export class MyCategory extends Category<Question['id']> {
+export class MyCategory extends Category<Question['id'][]> {
   @ApiProperty({ type: [String], example: ['dfs', 'sfssdxefdsfdsf'] })
   public solvedQuestions: Question['id'][];
 

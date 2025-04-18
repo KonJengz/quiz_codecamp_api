@@ -23,3 +23,11 @@ export class ObjectHelper {
     return processedObj;
   }
 }
+
+export class EnumHelper {
+  public static isEnumValue(entity: Object, value: string): boolean {
+    if (!value) return false;
+
+    return !!entity[value];
+  }
+}

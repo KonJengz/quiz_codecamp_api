@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import { NullAble } from 'src/common/types/types';
-import { ITestCase } from './codeExecutor.service';
+import { ITestCase, TestCaseMatcherEnum } from './codeExecutor.service';
 import { TestCase } from 'src/resources/test-cases/domain/test-cases.domain';
 import { SubmissionStatusEnum } from 'src/resources/submissions/domain/submission.domain';
 import { ApiProperty } from '@nestjs/swagger';
@@ -39,6 +39,11 @@ export class TestResultDetail {
   expected: any;
   @ApiProperty({ type: Number })
   testCase: number;
+  @ApiProperty({ type: String, enum: TestCaseMatcherEnum })
+  matcher: TestCaseMatcherEnum;
+  @ApiProperty({ type: Number })
+  not: boolean;
+  @ApiProperty({ type: String, nullable: true })
   error?: string;
 }
 
@@ -75,6 +80,7 @@ export abstract class CodeExecutorService {
 
   public abstract generateTestCase(
     testCases: Omit<TestCase, 'id' | 'createdAt' | 'updatedAt'>[],
+    variableName: string,
   ): ITestCase[];
 
   public abstract validateCode(input: ValidateCodeInput): ValidateCodeOutput;

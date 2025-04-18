@@ -24,6 +24,10 @@ export class AuthLoginDto {
 }
 
 export class AuthLoginResponse extends CoreApiResponse<AuthLoginData> {
-  @ApiProperty({ type: () => AuthLoginData })
+  @ApiProperty({
+    type: () => AuthLoginData,
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2N2ZlNTI5MDkzMjhjMDAyZmY3NzI0MzciLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc0NDg2NDAzMCwiZXhwIjoxNzQ1MTIzMjMwfQ.rmYDeKduSav_zXdAda5wHywUssb-IegEdVLstjKPrxw',
+  })
   public data: AuthLoginData;
 }

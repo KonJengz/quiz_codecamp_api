@@ -11,9 +11,9 @@ export abstract class Repository<
 > {
   abstract create(data: U): Promise<T>;
 
-  abstract findById(id: T['id']): Promise<NullAble<T>>;
+  abstract findById(id: T['id'], ...args: unknown[]): Promise<NullAble<T>>;
 
-  abstract findMany(): Promise<Array<T>>;
+  abstract findMany(...args: unknown[]): Promise<Array<T>>;
 
   abstract update<U extends Partial<Omit<T, 'id'>>>(
     data: U,
