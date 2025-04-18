@@ -27,3 +27,8 @@ export class UpdateCategoryDto {
     return ['name', 'isChallenge'];
   }
 }
+
+export class UpdateCategoryStatusResponse extends CoreApiResponse<Category> {
+  @ApiProperty({ type: Category })
+  data: Category;
+}

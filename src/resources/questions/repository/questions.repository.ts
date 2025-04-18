@@ -11,6 +11,8 @@ import { Category } from 'src/resources/categories/domain/categories.domain';
 import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
 import { User } from 'src/resources/users/domain/user.domain';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
+import { DomainQueryTypes } from 'src/common/types/products-shared.type';
+import { MongoRepositoryHelper } from 'src/infrastructure/persistence/config/mongodb/mongo.repository';
 
 @Injectable()
 export class QuestionDocumentRepository implements QuestionRepository {
@@ -65,20 +67,17 @@ export class QuestionDocumentRepository implements QuestionRepository {
     return QuestionMapper.toDomain(question, true);
   }
 
-  async findMany(): Promise<Question[]> {
+  async findMany(options: DomainQueryTypes): Promise<Question[]> {
+    const filter = MongoRepositoryHelper.statusFilter(options.status);
+
     const questions = await this.questionModel
-      .find(
-        {
-          deletedAt: null,
-        },
-        {
-          id: true,
-          title: true,
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
-        },
-      )
+      .find(filter, {
+        id: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      })
       .populate(this.questionPopulateOption);
     // If there are no questions, return []
     if (questions.length === 0) return [];
@@ -133,9 +132,11 @@ export class QuestionDocumentRepository implements QuestionRepository {
     data: U,
     id: string,
   ): Promise<Question> {
+    console.log(data);
     const updatedQuestion = await this.questionModel.findByIdAndUpdate(
       id,
       data,
+      { new: true },
     );
 
     return QuestionMapper.toDomain(updatedQuestion);

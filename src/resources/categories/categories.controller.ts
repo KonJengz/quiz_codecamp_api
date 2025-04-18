@@ -29,11 +29,20 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { UpdateCategoryDto, UpdateCategoryResponse } from './dto/update.dto';
+import {
+  UpdateCategoryDto,
+  UpdateCategoryResponse,
+  UpdateCategoryStatusResponse,
+} from './dto/update.dto';
 import { openApiDocs } from 'src/docs/open-api.docs';
 import { AccessTokenAuthGuard } from 'src/application/auth/guard/access-token.guard';
 import { AdminGuard } from 'src/application/auth/guard/admin.guard';
 import { HttpRequestWithUser } from 'src/common/types/http.type';
+import {
+  DomainQueryEnums,
+  DomainStatusEnums,
+} from 'src/common/types/products-shared.type';
+import { QueryEnum } from 'src/utils/decorators/param/QueryEnum.decorator';
 
 @Controller({ version: '1', path: categoriesPath.base })
 export class CategoriesController {
@@ -46,13 +55,26 @@ export class CategoriesController {
     description:
       'Query to filter type of categories as a challenge and non-challenge. Provide true if desired response is challenge-categories. Otherwise for non-challenge.',
   })
+  @ApiQuery({
+    name: DomainQueryEnums.status,
+    required: false,
+    type: String,
+    enum: DomainStatusEnums,
+    description:
+      'Query to filter status of categories. If not provided, the ACTIVE status will be default.',
+  })
   @ApiOkResponse({ type: GetManyCategoriesResponse })
   @Get()
   async getMany(
     @Query(categoriesPath.queries.isChallenge)
     isChallenge: CategoriesQueriesOption['isChallenge'],
+    @QueryEnum({ queryStr: DomainQueryEnums.status, entity: DomainStatusEnums })
+    status: DomainStatusEnums,
   ): Promise<GetManyCategoriesResponse> {
-    const categories = await this.categoriesService.getMany({ isChallenge });
+    const categories = await this.categoriesService.getMany({
+      status,
+      isChallenge,
+    });
     return GetManyCategoriesResponse.getSuccess<Category[]>(
       categoriesPath.base,
       categories,
@@ -91,6 +113,7 @@ export class CategoriesController {
     // to make sure that category is correct type --> Category<QuestionInCategoryList>
     // but to not fix a lot of code base
     // we make sure that this will be Category<QuestionInCategoryList>
+    // by providing generic.
     const category =
       await this.categoriesService.getById<QuestionInCategoryList>(id, false);
     return GetCategoryByIdResponse.getSuccess(
@@ -169,6 +192,22 @@ export class CategoriesController {
     const updatedCategory = await this.categoriesService.update(body);
     return UpdateCategoryResponse.patchSuccess(
       `${categoriesPath.base}/${categoriesPath.paramId}`,
+      updatedCategory,
+    );
+  }
+
+  @ApiBearerAuth()
+  @ApiParam({ name: categoriesPath.paramId, required: true })
+  @ApiOkResponse({ type: UpdateCategoryStatusResponse })
+  @UseGuards(AccessTokenAuthGuard, AdminGuard)
+  @Patch(categoriesPath.updateStatus)
+  async updateStatus(
+    @Param(categoriesPath.paramId) id: Category['id'],
+  ): Promise<UpdateCategoryStatusResponse> {
+    const updatedCategory = await this.categoriesService.updateStatus(id);
+
+    return UpdateCategoryStatusResponse.patchSuccess(
+      `${categoriesPath.base}/${id}/status`,
       updatedCategory,
     );
   }

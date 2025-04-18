@@ -21,6 +21,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { AccessTokenAuthGuard } from 'src/application/auth/guard/access-token.guard';
 import { AdminGuard } from 'src/application/auth/guard/admin.guard';
@@ -35,7 +36,13 @@ import { HttpRequestWithUser } from 'src/common/types/http.type';
 import {
   UpdateQuestionDto,
   UpdateQuestionResponse,
+  UpdateQuestionStatusResponse,
 } from './dto/update-question.dto';
+import {
+  DomainQueryEnums,
+  DomainStatusEnums,
+} from 'src/common/types/products-shared.type';
+import { QueryEnum } from 'src/utils/decorators/param/QueryEnum.decorator';
 
 @Controller({ version: '1', path: questionsPath.base })
 export class QuestionsController {
@@ -57,10 +64,19 @@ export class QuestionsController {
     );
   }
 
+  @ApiQuery({
+    name: DomainQueryEnums.status,
+    enum: DomainStatusEnums,
+    required: false,
+    description: `Query for filter status of questions. If not provided, ${DomainStatusEnums.ACTIVE} will be default`,
+  })
   @ApiOkResponse({ type: GetManyQuestionsResponse })
   @Get()
-  async getMany(): Promise<GetManyQuestionsResponse> {
-    const questions = await this.questionsService.getMany();
+  async getMany(
+    @QueryEnum({ entity: DomainStatusEnums, queryStr: DomainQueryEnums.status })
+    status: DomainStatusEnums,
+  ): Promise<GetManyQuestionsResponse> {
+    const questions = await this.questionsService.getMany({ status });
 
     return GetManyQuestionsResponse.getSuccess(questionsPath.base, questions);
   }
@@ -96,20 +112,6 @@ export class QuestionsController {
     );
   }
 
-  // @ApiParam({ name: questionsPath.categoryParam, required: true })
-  // @ApiOkResponse({ type: GetQuestionsByCategoryIdResponse })
-  // @Get(questionsPath.category)
-  // async getByCategoryId(
-  //   @Param(questionsPath.categoryParam) categoryId: Category['id'],
-  // ): Promise<GetQuestionsByCategoryIdResponse> {
-  //   const questions = await this.questionsService.getByCategoryId(categoryId);
-
-  //   return GetQuestionsByCategoryIdResponse.getSuccess(
-  //     `${categoriesPath.base}/${categoryId}`,
-  //     questions,
-  //   );
-  // }
-
   @ApiBearerAuth()
   @ApiOkResponse({ type: UpdateQuestionResponse })
   @UseGuards(AccessTokenAuthGuard, AdminGuard)
@@ -124,6 +126,22 @@ export class QuestionsController {
 
     return UpdateQuestionResponse.patchSuccess(
       `${questionsPath.base}/${body.questionId}`,
+      updatedQuestion,
+    );
+  }
+
+  @ApiBearerAuth()
+  @ApiParam({ name: questionsPath.paramId, required: true })
+  @ApiOkResponse({ type: UpdateQuestionStatusResponse })
+  @UseGuards(AccessTokenAuthGuard, AdminGuard)
+  @Patch(questionsPath.updateStatus)
+  async updateStatus(
+    @Param(questionsPath.paramId) id: Question['id'],
+  ): Promise<UpdateQuestionStatusResponse> {
+    const updatedQuestion = await this.questionsService.updateStatus(id);
+
+    return UpdateQuestionStatusResponse.patchSuccess(
+      `${questionsPath.base}/${id}/status`,
       updatedQuestion,
     );
   }

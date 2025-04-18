@@ -1,7 +1,7 @@
 export abstract class Service<T extends { id: string }> {
   abstract create(data: unknown): Promise<T>;
 
-  abstract getMany(): Promise<T[]>;
+  abstract getMany(...args: any[]): Promise<T[]>;
 
   abstract getById(id: T['id'], ...args: any[]): Promise<T>;
 

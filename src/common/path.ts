@@ -35,6 +35,7 @@ export const categoriesPath = {
   paramId: CATEGORIES_PATH.paramId,
   getByIdAndQuestions: `:${CATEGORIES_PATH.paramId}/questions/`,
   getByIdAndQuestionsIncludeMe: `:${CATEGORIES_PATH.paramId}/questions/${ME}`,
+  updateStatus: `:${CATEGORIES_PATH.paramId}/status`,
 };
 
 export const questionsPath = {
@@ -44,6 +45,7 @@ export const questionsPath = {
   paramId: QUESTIONS_PATH.paramId,
   category: `${categoriesPath.base}/:${categoriesPath.paramId}`,
   categoryParam: `${categoriesPath.paramId}`,
+  updateStatus: `:${QUESTIONS_PATH.paramId}/status`,
 };
 
 export const submissionsPath = {

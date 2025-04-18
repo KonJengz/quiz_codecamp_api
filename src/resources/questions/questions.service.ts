@@ -13,6 +13,8 @@ import { User } from '../users/domain/user.domain';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { ObjectHelper } from 'src/utils/object.helper';
 import { ITestCase } from 'src/infrastructure/executor/codeExecutor.service';
+import { NullAble } from 'src/common/types/types';
+import { DomainQueryTypes } from 'src/common/types/products-shared.type';
 
 @Injectable()
 export class QuestionsService implements Service<Question> {
@@ -77,20 +79,8 @@ export class QuestionsService implements Service<Question> {
     return this.questionRepository.findByIdAndUserSubmission(id, userId);
   }
 
-  async getByCategoryId(categoryId: Category['id']): Promise<Question[]> {
-    // Validate ID before proceed.
-    IDValidator(categoryId, 'Category');
-
-    const isCategoryExist = await this.categoriesService.getById(categoryId);
-
-    if (!isCategoryExist)
-      throw ErrorApiResponse.notFound(`ID`, categoryId, 'Category');
-
-    return this.questionRepository.findByCategoryId(categoryId);
-  }
-
-  getMany(): Promise<Question[]> {
-    return this.questionRepository.findMany();
+  getMany(options: DomainQueryTypes = {}): Promise<Question[]> {
+    return this.questionRepository.findMany(options);
   }
   async update(data: UpdateQuestionDto, id: string): Promise<Question> {
     const question = await this.questionRepository.findById(id);
@@ -100,6 +90,20 @@ export class QuestionsService implements Service<Question> {
     const processedData = await this.validateUpdateInfo(data, question);
 
     return this.questionRepository.update(processedData, id);
+  }
+
+  async updateStatus(id: Question['id']): Promise<Question> {
+    IDValidator(id, 'Question');
+
+    const question = await this.questionRepository.findById(id);
+
+    if (!question) throw ErrorApiResponse.notFound('ID');
+
+    const data: { deletedAt: NullAble<Date> } = { deletedAt: null };
+
+    if (!question.deletedAt) data.deletedAt = new Date(Date.now());
+
+    return this.questionRepository.update(data, id);
   }
 
   // --- PRIVATE METHOD PART ---

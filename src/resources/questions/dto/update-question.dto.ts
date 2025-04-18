@@ -70,3 +70,8 @@ export class UpdateQuestionResponse extends CoreApiResponse<Question> {
   @ApiProperty({ type: Question })
   data: Question;
 }
+
+export class UpdateQuestionStatusResponse extends CoreApiResponse<Question> {
+  @ApiProperty({ type: Question })
+  data: Question;
+}

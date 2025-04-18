@@ -25,7 +25,37 @@ export class GetManyQuestionsResponse extends CoreApiResponse<
 }
 
 export class GetQuestionByIdResponse extends CoreApiResponse<Question> {
-  @ApiProperty({ type: Question })
+  @ApiProperty({
+    type: Question,
+    example: {
+      id: '6800dae75b4c2356523955b2',
+      createdAt: '4/17/2025, 5:41:43 PM',
+      updatedAt: '4/18/2025, 11:13:37 AM',
+      deletedAt: null,
+      title: 'ประกาศตัวแปร',
+      description: 'ประกาศตัวแปร',
+      variableName: 'firstName',
+      solution: "let firstName = 'John'",
+      starterCode: '/** Declare the firstName variable as your name  */',
+      category: {
+        id: '67fe52909328c002ff7724a1',
+        name: 'String',
+        isChallenge: false,
+      },
+      testCases: [
+        {
+          id: '6800dae75b4c2356523955b3',
+          createdAt: '4/17/2025, 5:41:43 PM',
+          updatedAt: '4/17/2025, 5:41:43 PM',
+          deletedAt: null,
+          input: [],
+          expected: 'null',
+          matcher: 'toBe',
+          not: true,
+        },
+      ],
+    },
+  })
   data: Question;
 }
 

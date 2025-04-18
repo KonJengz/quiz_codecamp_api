@@ -6,6 +6,7 @@ import {
   QuestionInCategoryList,
 } from '../domain/categories.domain';
 import { ApiProperty } from '@nestjs/swagger';
+import { DomainQueryTypes } from 'src/common/types/products-shared.type';
 
 export class GetManyCategoriesResponse extends CoreApiResponse<
   Array<Category>
@@ -121,6 +122,6 @@ export class GetCategoryByIdIncludeQuestionsAndMe extends CoreApiResponse<
   data: Category<QuestionAndSolveStatus>;
 }
 
-export type CategoriesQueriesOption = {
+export interface CategoriesQueriesOption extends DomainQueryTypes {
   isChallenge?: 'true' | 'false';
-};
+}
