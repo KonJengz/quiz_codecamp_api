@@ -30,6 +30,7 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
   ): Promise<Submission> {
     const createdSubmission = new this.submissionModel(data);
     await createdSubmission.save();
+
     return SubmissionMapper.toDomain(createdSubmission);
   }
 
@@ -39,16 +40,26 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
     // We make pipeline for updating the data first,
     // If there are already a submission but status === PASSED
     // We don't update the status and code
+
+    const codePipeline =
+      data.status === SubmissionStatusEnum.PASSED
+        ? {
+            code: data.code,
+          }
+        : {
+            code: {
+              $cond: [
+                { $eq: ['$status', SubmissionStatusEnum.PASSED] },
+                '$code',
+                data.code,
+              ],
+            },
+          };
+
     const upsertPipeline = [
       {
         $set: {
-          code: {
-            $cond: [
-              { $eq: ['$status', SubmissionStatusEnum.PASSED] },
-              '$code',
-              data.code,
-            ],
-          },
+          ...codePipeline,
           status: {
             $cond: [
               { $eq: ['$status', SubmissionStatusEnum.PASSED] },
@@ -56,6 +67,11 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
               data.status,
             ],
           },
+          // seed createdAt on insert only
+          createdAt: { $ifNull: ['$createdAt', new Date()] },
+
+          // always bump updatedAt
+          updatedAt: new Date(),
         },
       },
     ];
@@ -68,7 +84,7 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
       // Passing update pipeline for
       // control update flow.
       upsertPipeline,
-      { new: true, upsert: true },
+      { new: true, upsert: true, setDefaultsOnInsert: true, timestamps: false },
     );
 
     const returnSubmission = upsertedSubmission.$clone();

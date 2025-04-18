@@ -73,7 +73,8 @@ function countLetter(word) {
   {
     // SECOND QUESTION
     title: 'กลับคำ',
-    description: `เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และคืนค่าข้อความที่เรียงตัวอักษรกลับจากหลังมาหน้า
+    description: `เขียนฟังก์ชันที่รับข้อความ (String) เป็น input 
+    และคืนค่าข้อความที่เรียงตัวอักษรกลับจากหลังมาหน้า
 ตัวอย่าง Input: "hello"
 ตัวอย่าง expected: "olleh"
 `,
@@ -115,7 +116,8 @@ function reverseWord(word) {
   {
     // THIRD QUESTION
     title: 'นับจำนวนสระ',
-    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และนับจำนวนสระ (a, e, i, o, u) ที่อยู่ในข้อความนั้น (ไม่นับตัวพิมพ์ใหญ่/เล็ก)
+    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input
+     และนับจำนวนสระ (a, e, i, o, u) ที่อยู่ในข้อความนั้น (ไม่นับตัวพิมพ์ใหญ่/เล็ก)
 ตัวอย่างที่ 1:
 Input: "Programming"
 expected: 3
@@ -179,7 +181,8 @@ function vowelCount(text) {
   {
     // FOURTH QUESTION
     title: 'นับจำนวนคำ',
-    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และนับจำนวนคำที่อยู่ในข้อความนั้น (โดยถือว่าคำถูกคั่นด้วยช่องว่าง)
+    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input 
+    และนับจำนวนคำที่อยู่ในข้อความนั้น (โดยถือว่าคำถูกคั่นด้วยช่องว่าง)
 ตัวอย่างที่ 1:
  Input: "This is a sample sentence."
 expected: 5
@@ -242,7 +245,9 @@ function countWords(text) {
   {
     // FIFTH QUESTION
     title: 'ตรวจสอบ Palindrome',
-    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และตรวจสอบว่าเป็น Palindrome (อ่านจากหน้าไปหลังและหลังมาหน้าได้เหมือนกัน) หรือไม่ (ไม่สนใจตัวพิมพ์ใหญ่/เล็กและช่องว่าง)
+    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input 
+    และตรวจสอบว่าเป็น Palindrome (อ่านจากหน้าไปหลังและหลังมาหน้าได้เหมือนกัน) หรือไม่ 
+    (ไม่สนใจตัวพิมพ์ใหญ่/เล็กและช่องว่าง)
 ตัวอย่างที่ 1:
 Input: "Racecar"
 expected: true
@@ -328,7 +333,8 @@ function isPalindrome(text) {
   {
     // SIXTH QUESTION
     title: 'แปลงตัวพิมพ์เล็กเป็นตัวพิมพ์ใหญ่',
-    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input และแปลงตัวอักษรทุกตัวในข้อความนั้นให้เป็นตัวพิมพ์ใหญ่
+    description: `คำอธิบาย: เขียนฟังก์ชันที่รับข้อความ (String) เป็น input 
+    และแปลงตัวอักษรทุกตัวในข้อความนั้นให้เป็นตัวพิมพ์ใหญ่
 ตัวอย่างที่ 1:
 Input: "javascript is fun"
 expected: "JAVASCRIPT IS FUN"
@@ -367,42 +373,6 @@ function convertToUppercase(text) {
       {
         input: ['developer'],
         expected: 'DEVELOPER',
-        matcher: TestCaseMatcherEnum.toBe,
-        not: false,
-      },
-      {
-        input: ['hello'],
-        expected: false,
-        matcher: TestCaseMatcherEnum.toBe,
-        not: false,
-      },
-      {
-        input: ['Madam'],
-        expected: true,
-        matcher: TestCaseMatcherEnum.toBe,
-        not: false,
-      },
-      {
-        input: ['DOQxkKXUUxkKXqOd'],
-        expected: true,
-        matcher: TestCaseMatcherEnum.toBe,
-        not: false,
-      },
-      {
-        input: ['qJisnQQNsijq'],
-        expected: true,
-        matcher: TestCaseMatcherEnum.toBe,
-        not: false,
-      },
-      {
-        input: ['F'],
-        expected: true,
-        matcher: TestCaseMatcherEnum.toBe,
-        not: false,
-      },
-      {
-        input: ['EmEduYYTVF'],
-        expected: false,
         matcher: TestCaseMatcherEnum.toBe,
         not: false,
       },
@@ -595,7 +565,9 @@ function countLetter(word,letter) {
   {
     // THRID QUESTION
     title: 'Factorial',
-    description: `เขียนฟังก์ชันที่รับตัวเลขจำนวนเต็มเป็น input และคำนวณค่า Factorial ของตัวเลขนั้น (ผลคูณของตัวเลขตั้งแต่ 1 ถึงตัวเลขนั้น)
+    description: `เขียนฟังก์ชันที่รับตัวเลขจำนวนเต็มเป็น input 
+    และคำนวณค่า Factorial ของตัวเลขนั้น 
+    (ผลคูณของตัวเลขตั้งแต่ 1 ถึงตัวเลขนั้น)
 ตัวอย่าง Input: 5
 ตัวอย่าง expected: 120 (5 * 4 * 3 * 2 * 1)
 `,
@@ -634,7 +606,10 @@ function factorial(number) {
   {
     // FOURTH QUESTION
     title: 'หาจำนวนเฉพาะ',
-    description: ` เขียนฟังก์ชันที่รับตัวเลขจำนวนเต็มเป็น input และตรวจสอบว่าเป็นจำนวนเฉพาะหรือไม่ จากนั้นให้แสดงผลลัพธ์เป็น true ถ้าเป็นจำนวนเฉพาะ และ false ถ้าไม่ใช่
+    description: ` เขียนฟังก์ชันที่รับตัวเลขจำนวนเต็มเป็น input 
+    และตรวจสอบว่าเป็นจำนวนเฉพาะหรือไม่ 
+    จากนั้นให้แสดงผลลัพธ์เป็น true ถ้าเป็นจำนวนเฉพาะ 
+    และ false ถ้าไม่ใช่
 ตัวอย่างที่ 1:
 Input: 17
 expected: true
@@ -709,7 +684,8 @@ expected: true
 export const conditionalQuestions: SeedingQuestions = [
   {
     title: 'คำนวณเกรดของนักเรียน',
-    description: `เขียน Logic ที่เอาไว้คำนวณเกรดสุดท้ายของนักเรียนใน function finalGrade โดยอิงจากพารามิเตอร์สองตัว คือ คะแนนสอบและจำนวนโปรเจคที่ทำเสร็จ
+    description: `เขียน Logic ที่เอาไว้คำนวณเกรดสุดท้ายของนักเรียนใน function finalGrade 
+    โดยอิงจากพารามิเตอร์สองตัว คือ คะแนนสอบและจำนวนโปรเจคที่ทำเสร็จ
 
 รับพารามิเตอร์ 2 ตัวดังนี้:
 
@@ -803,7 +779,9 @@ export const numberQuestions: SeedingQuestions = [
   {
     // FIRST QUESTION
     title: 'แปลงอุณหภูมิ',
-    description: ` เขียนฟังก์ชันที่รับอุณหภูมิเป็นองศาเซลเซียส (Celsius) เป็น input และแปลงเป็นองศาฟาเรนไฮต์ (Fahrenheit) โดยใช้สูตร: F = (C * 9/5) + 32
+    description: `เขียนฟังก์ชันที่รับอุณหภูมิเป็นองศาเซลเซียส (Celsius) 
+    เป็น input และแปลงเป็นองศาฟาเรนไฮต์ (Fahrenheit)
+     โดยใช้สูตร: F = (C * 9/5) + 32
 ตัวอย่างที่ 1:
 Input: 25
 expected: 77
@@ -845,7 +823,9 @@ expected: 104
   {
     // SECOND QUESTION
     title: 'ตรวจสอบเลขคู่หรือเลขคี่',
-    description: `รับค่าตัวเลขหนึ่งตัว และให้ return ค่าออกมาเป็น "Even" ถ้าตัวเลขนั้นเป็นเลขคู่ และ "Odd" ถ้าตัวเลขเป็นเลขคี่
+    description: `รับค่าตัวเลขหนึ่งตัว 
+    และให้ return ค่าออกมาเป็น "Even" ถ้าตัวเลขนั้นเป็นเลขคู่ 
+    และ "Odd" ถ้าตัวเลขเป็นเลขคี่
 ตัวอย่างที่ 1:
 Input: 7
 expected: "Odd"
@@ -896,7 +876,8 @@ expected: "Even"
   {
     // THIRD QUESTION
     title: 'แปลงวินาทีเป็น ชั่วโมง:นาที:วินาที',
-    description: `เขียนฟังก์ชันที่รับวินาทีเป็นจำนวนเต็ม แล้วแปลงเป็นเวลารูปแบบ ชั่วโมง:นาที:วินาที
+    description: `เขียนฟังก์ชันที่รับวินาทีเป็นจำนวนเต็ม 
+    แล้วแปลงเป็นเวลารูปแบบ ชั่วโมง:นาที:วินาที
 ตัวอย่างที่ 1:
 Input: 3661
 expected: "1:1:1"

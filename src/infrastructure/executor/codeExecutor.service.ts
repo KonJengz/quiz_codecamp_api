@@ -209,6 +209,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
 
   private resolveTestResult(
     testResults: TestResultType,
+    testInputs: unknown[],
     numOrder: number,
   ): TestedCodeResults['failed'][number] {
     return {
@@ -216,6 +217,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
       expected: testResults.detail.expected,
       matcher: testResults.detail.matcher,
       testCase: numOrder,
+      input: testInputs,
       not: testResults.detail.not,
     };
   }
@@ -245,24 +247,24 @@ export class IVMCodeExecutor implements CodeExecutorService {
         const numOrder = index + 1;
         try {
           // Check the test case first
-          if (!(testCase.input && testCase.expected))
+          if (!testCase.input && testCase.expected === undefined)
             throw ErrorApiResponse.internalServerError(
               `The test case does not provide input or output. Please try again.`,
             );
 
           // Invoked function with the input of the test case
           // and return the value back.
+
+          const fnInput = this.formatInputToString(testCase.input);
+
           const result = await context.eval(
-            this.invokedFuncAndReturn(
-              code,
-              `${fnName}(${testCase.input.join(',')})`,
-            ),
+            this.invokedFuncAndReturn(code, `${fnName}(${fnInput})`),
           );
 
-          if (!result)
-            throw new Error(
-              `The results is ${result} and cannot proceed to test process.`,
-            );
+          // if (!result)
+          //   throw new Error(
+          //     `The results is ${result} and cannot proceed to test process.`,
+          //   );
 
           // generate the assertion framework and code for testing the result
           const assertionCode = this.generateAssertionCode(testCase, result);
@@ -273,6 +275,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
           const parsedTestResult: TestResultType = JSON.parse(testResult);
           const testResultDetail = this.resolveTestResult(
             parsedTestResult,
+            testCase.input,
             numOrder,
           );
           if (!parsedTestResult.passed) {
@@ -286,6 +289,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
           results.failed.push({
             actual: '',
             expected: '',
+            input: testCase.input,
             matcher: testCase.matcher,
             testCase: numOrder,
             not: testCase.not,
@@ -326,6 +330,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
       results.failed.push({
         actual: '',
         expected: '',
+        input: [],
         not: null,
         matcher: null,
         testCase: 0,
@@ -345,7 +350,12 @@ export class IVMCodeExecutor implements CodeExecutorService {
           });
 
           const testResult: TestResultType = JSON.parse(unParsedTestResult);
-          const testResultDetail = this.resolveTestResult(testResult, numOrder);
+
+          const testResultDetail = this.resolveTestResult(
+            testResult,
+            testCase.input,
+            numOrder,
+          );
 
           // If test is not passed
           // we add the failed test case to detail
@@ -365,6 +375,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
           results.failed.push({
             actual: '',
             expected: '',
+            input: testCase.input,
             not: testCase.not,
             testCase: numOrder,
             matcher: testCase.matcher,
@@ -476,6 +487,18 @@ export class IVMCodeExecutor implements CodeExecutorService {
 
   public validateFunctionSyntax(code: string): boolean {
     return this.arrowFnRegex.test(code) || this.functionRegex.test(code);
+  }
+
+  private formatInputToString(inputs: ITestCase['input']): string {
+    return inputs
+      .map((input) => {
+        if (typeof input === 'object') {
+          return JSON.stringify(input);
+        } else if (typeof input === 'string') {
+          return `"${input}"`;
+        }
+      })
+      .join(', ');
   }
 
   // public parseInputToOriginalValue(

@@ -124,6 +124,7 @@ export class QuestionDocumentRepository implements QuestionRepository {
         { userId },
       );
 
+    if (!questions) return null;
     const submissions = questions['submissions'];
     return QuestionMapper.toDomainWithSubmission(questions, submissions[0]);
   }
