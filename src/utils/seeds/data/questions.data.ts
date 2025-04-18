@@ -5,7 +5,7 @@ import {
 } from 'src/resources/questions/dto/create-question.dto';
 import { TestCaseSchemaClass } from 'src/resources/test-cases/repository/entities/test-cases.entities';
 
-function generateSeedingTestCase(
+function generateFunctionSeedingTestCase(
   testCases: Pick<TestCaseSchemaClass, 'input' | 'expected'>[],
 ): CreateTestCaseSimulWithQuestion[] {
   return testCases.map((testCase) => ({
@@ -465,7 +465,7 @@ function countLetter(word,letter) {
     /** Writing your code here */
 }
     `,
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: ['banana', 'a'],
         expected: 3,
@@ -499,7 +499,7 @@ function countLetter(word,letter) {
       'function fizzBuzz(numbers) {\n    const results = []\n    for(let i = 1; i <= numbers; i++) {\n        let expected = ""\n        if(i % 3 === 0) expected += "Fizz"\n\n        if(i % 5 === 0) expected += "Buzz"\n\n        if(expected.length === 0) expected = i\n        \n        results.push(expected)\n    }\n    return results\n}',
     starterCode:
       '/**\n * Writing a logic inside the function\n * and return the result as an array\n * @param {Number} number\n * @return {Array<number | string>} results\n */\nfunction fizzBuzz(number) {\n    /**Writing your code here */\n}\n',
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: [10],
         expected: [1, 2, 'Fizz', 4, 'Buzz', 'Fizz', 7, 8, 'Fizz', 'Buzz'],
@@ -614,7 +614,7 @@ function factorial(number) {
     /** Writing your code here */
 }
 `,
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: [5],
         expected: 120,
@@ -663,7 +663,7 @@ expected: true
     /** Writing your code here */
 }
 `,
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: [17],
         expected: true,
@@ -764,7 +764,7 @@ expected: 100
     function finalGrade (exam, projects) {
      /** Writing your code here */
 }`,
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: [100, 12],
         expected: 100,
@@ -825,7 +825,7 @@ expected: 104
     /** Writing your code here */
 }
 `,
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: [25],
         expected: 77,
@@ -868,7 +868,7 @@ expected: "Even"
     /** Writing your code here */
 }
 `,
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: [7],
         expected: 'Odd',
@@ -924,7 +924,7 @@ expected: "3:25:45"
     /** Writing your code here */
 }
 `,
-    testCases: generateSeedingTestCase([
+    testCases: generateFunctionSeedingTestCase([
       {
         input: [3661],
         expected: '1:1:1',
