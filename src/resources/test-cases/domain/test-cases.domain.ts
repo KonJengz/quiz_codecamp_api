@@ -33,7 +33,7 @@ export class TestCase extends BaseDomain {
     this.input = input;
     this.expected = expected;
     this.matcher = matcher;
-    if (this.not !== undefined) this.not = not;
+    this.not = not;
     if (variable) this.variable = variable;
   }
 }

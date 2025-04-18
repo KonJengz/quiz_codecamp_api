@@ -29,6 +29,8 @@ type TestResultType = {
   detail: {
     actual: unknown;
     expected: unknown;
+    matcher: TestCaseMatcherEnum;
+    not: boolean;
   };
   error: string;
 };
@@ -212,7 +214,9 @@ export class IVMCodeExecutor implements CodeExecutorService {
     return {
       actual: testResults.detail.actual,
       expected: testResults.detail.expected,
+      matcher: testResults.detail.matcher,
       testCase: numOrder,
+      not: testResults.detail.not,
     };
   }
 
@@ -282,7 +286,9 @@ export class IVMCodeExecutor implements CodeExecutorService {
           results.failed.push({
             actual: '',
             expected: '',
+            matcher: testCase.matcher,
             testCase: numOrder,
+            not: testCase.not,
             error: `There is an error while testing code: ${err?.message}`,
           });
           passed = false;
@@ -320,6 +326,8 @@ export class IVMCodeExecutor implements CodeExecutorService {
       results.failed.push({
         actual: '',
         expected: '',
+        not: null,
+        matcher: null,
         testCase: 0,
         error: `There is an error while running code.: \n ${err?.message}`,
       });
@@ -338,11 +346,18 @@ export class IVMCodeExecutor implements CodeExecutorService {
 
           const testResult: TestResultType = JSON.parse(unParsedTestResult);
           const testResultDetail = this.resolveTestResult(testResult, numOrder);
+
+          // If test is not passed
+          // we add the failed test case to detail
+          // and skip the loop
           if (!testResult.passed) {
             results.failed.push(testResultDetail);
             passed = false;
             continue;
           }
+
+          // If this test case pass
+          // we push the PASSED record
           results.passed.push(testResultDetail);
         } catch (err) {
           this.logger.error(err?.message);
@@ -350,7 +365,9 @@ export class IVMCodeExecutor implements CodeExecutorService {
           results.failed.push({
             actual: '',
             expected: '',
+            not: testCase.not,
             testCase: numOrder,
+            matcher: testCase.matcher,
             error: 'There is an error while testing code.',
           });
         }

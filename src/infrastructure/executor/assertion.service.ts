@@ -105,13 +105,13 @@ export class CodeAssertionService {
     ${CodeAssertionService.baseDeepEqual}
     ${CodeAssertionService.baseHaveType}
 
-    function expect(actual,variableName) {
+    function expect(actual) {
       let passed;
 
       const result = {
         passed,
         detail: {
-          actual: variableName === actual ? actual : variableName,
+          actual:  actual,
           expected: '',
           describe: "",
         },
@@ -159,8 +159,8 @@ export class CodeAssertionService {
         ({ func, key, verb }) => `["${key}"] : (expected) => {
       result.detail.expected = expected;
       result.passed = (${func})(${not});
-      result.detail.not = ${not}
-
+      result.detail.not = ${not};
+      result.detail.matcher = "${key}";
     if (!result.passed) {
       result.error = ${CodeAssertionService.formatFailedAssertionStr};
     }
@@ -221,6 +221,6 @@ export class CodeAssertionService {
       // Wrap string values in quotes
       expected = `"${expected}"`;
     }
-    return `expect(${actual},'${actual}').${not ? `${TestCaseMatcherEnum.not}().` : ''}${matcher}(${expected})`;
+    return `expect(${actual}).${not ? `${TestCaseMatcherEnum.not}().` : ''}${matcher}(${expected})`;
   }
 }

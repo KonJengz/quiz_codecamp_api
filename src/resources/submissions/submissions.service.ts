@@ -51,6 +51,8 @@ export class SubmissionsService extends Service<Submission> {
       );
 
     // Validate user input code
+    // before proceeds any further
+    // If the user code syntax does not match with the question.
     this.validateUserSubmissionCode(data.code, isQuestionsExist);
 
     const resultObj = await this.runUserCodeWithTest(
