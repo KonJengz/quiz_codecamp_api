@@ -39,16 +39,26 @@ export class SubmissionDocumentRepository implements SubmissionRepository {
     // We make pipeline for updating the data first,
     // If there are already a submission but status === PASSED
     // We don't update the status and code
+
+    const codePipeline =
+      data.status === SubmissionStatusEnum.PASSED
+        ? {
+            code: data.code,
+          }
+        : {
+            code: {
+              $cond: [
+                { $eq: ['$status', SubmissionStatusEnum.PASSED] },
+                '$code',
+                data.code,
+              ],
+            },
+          };
+
     const upsertPipeline = [
       {
         $set: {
-          code: {
-            $cond: [
-              { $eq: ['$status', SubmissionStatusEnum.PASSED] },
-              '$code',
-              data.code,
-            ],
-          },
+          codePipeline,
           status: {
             $cond: [
               { $eq: ['$status', SubmissionStatusEnum.PASSED] },
