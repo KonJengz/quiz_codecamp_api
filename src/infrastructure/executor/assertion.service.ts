@@ -7,8 +7,6 @@ export class CodeAssertionService {
 
   public static baseIsToBe = `
     function isToBe(expected,actual) {
-        if(!expected || !actual) return false
-
         return expected === actual
     }
   `;
@@ -171,40 +169,6 @@ export class CodeAssertionService {
     }`,
       )
       .join(', \n');
-
-    //   [${matcherEnum.toBe}]: (expected) => {
-    //     result.detail.expected = expected;
-    //     result.passed = ${CodeAssertionService.toBe}(${not});
-    //     if (!result.passed) {
-    //       result.error = ${CodeAssertionService.formatFailedAssertionStr};
-    //     }
-    //     result.describe = "expect " + actual + "to${not ? ' not ' : ' '} ${matcherEnum.toBeStr} " + expected
-
-    //     ${not ? 'result.not = true' : ''}
-
-    //     return result;
-    //   },
-    //   [${matcherEnum.toBeDeepEqual}]: (expected) => {
-    //     result.detail.expected = expected;
-    //     result.passed = ${CodeAssertionService.toBeDeepEqual}(${not});
-    //     result.describe = \`expect \$\{actual} to${not ? ' not ' : ' '}${matcherEnum.toBeDeepEqualStr} \$\{expected} \`
-    //     if (!result.passed) {
-    //       result.error = ${CodeAssertionService.formatFailedAssertionStr};
-    //     }
-
-    //     return result;
-    //   },
-    //     [${matcherEnum.toHaveType}]: (expected) => {
-    //     result.detail.expected = expected;
-    //     result.passed = ${CodeAssertionService.toHaveType}(${not});
-    //     result.describe = \`expect \$\{actual} to${not ? ' not ' : ' '}${matcherEnum.toBeDeepEqualStr} \$\{expected} \`
-    //     if (!result.passed) {
-    //       result.error = ${CodeAssertionService.formatFailedAssertionStr};
-    //     }
-
-    //     return result;
-    //   },
-    // `;
   }
 
   public static generateAssertionCode(testCase: ITestCase, actual: unknown) {

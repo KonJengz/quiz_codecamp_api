@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Service } from 'src/common/base-class';
 import { Submission, SubmissionStatusEnum } from './domain/submission.domain';
-import { AllTestsResult, CreateSubmissionInput } from './dto/create.dto';
+import {
+  AllTestsResult,
+  CreatedSubmissionAndTestResult,
+  CreateSubmissionInput,
+} from './dto/create.dto';
 import {
   CodeExecutorService,
   SubmittedCodeResult,
@@ -37,7 +41,7 @@ export class SubmissionsService extends Service<Submission> {
 
   override async create(
     data: CreateSubmissionInput,
-  ): Promise<Submission & { testResults: AllTestsResult }> {
+  ): Promise<CreatedSubmissionAndTestResult> {
     const isQuestionsExist = await this.questionsService.getById(
       data.questionId,
     );
@@ -64,7 +68,7 @@ export class SubmissionsService extends Service<Submission> {
       },
     );
 
-    const testResults = this.resolveTestResults(resultObj);
+    const { logs, ...testResults } = this.resolveTestResults(resultObj);
 
     const createdSubmission = await this.submissionRepository.upsert({
       code: data.code,
@@ -83,6 +87,7 @@ export class SubmissionsService extends Service<Submission> {
 
     return {
       ...createdSubmission,
+      logs,
       testResults,
     };
   }
@@ -151,8 +156,10 @@ export class SubmissionsService extends Service<Submission> {
     return;
   }
 
-  private resolveTestResults(results: SubmittedCodeResult): AllTestsResult {
-    const { errMsg, isError, results: testResults, status } = results;
+  private resolveTestResults(
+    results: SubmittedCodeResult,
+  ): AllTestsResult & { logs: string[] } {
+    const { errMsg, isError, results: testResults, status, logs } = results;
     if (isError) throw ErrorApiResponse.badRequest(errMsg);
     const testResultDetail: AllTestsResult = {
       failed: 0,
@@ -184,6 +191,6 @@ export class SubmissionsService extends Service<Submission> {
       testResultDetail.details = testResults.failed;
     }
 
-    return testResultDetail;
+    return { ...testResultDetail, logs };
   }
 }

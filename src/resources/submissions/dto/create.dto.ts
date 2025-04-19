@@ -25,6 +25,8 @@ export class AllTestsResult {
 }
 
 export class CreatedSubmissionAndTestResult extends Submission {
+  @ApiProperty({ type: [String] })
+  logs: string[];
   @ApiProperty({ type: AllTestsResult })
   testResults: AllTestsResult;
 }
