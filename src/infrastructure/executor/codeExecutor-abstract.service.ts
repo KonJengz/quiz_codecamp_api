@@ -33,6 +33,8 @@ export type CodeExecutionResult = {
 };
 
 export class TestResultDetail {
+  @ApiProperty({ type: String, enum: SubmissionStatusEnum, required: true })
+  status: SubmissionStatusEnum;
   @ApiProperty({ examples: [[1, 5], 'string', { name: 'John' }] })
   actual: any;
   @ApiProperty({ examples: ['Hello world', 1, { age: 18 }] })

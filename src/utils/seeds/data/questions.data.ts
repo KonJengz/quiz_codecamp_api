@@ -164,7 +164,7 @@ function vowelCount(text) {
       },
       {
         input: ['apple'],
-        expected: 1,
+        expected: 2,
         matcher: TestCaseMatcherEnum.toBe,
         not: false,
       },

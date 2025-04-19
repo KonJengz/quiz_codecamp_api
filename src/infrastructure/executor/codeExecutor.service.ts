@@ -213,6 +213,9 @@ export class IVMCodeExecutor implements CodeExecutorService {
     numOrder: number,
   ): TestedCodeResults['failed'][number] {
     return {
+      status: testResults.passed
+        ? SubmissionStatusEnum.PASSED
+        : SubmissionStatusEnum.FAILED,
       actual: testResults.detail.actual,
       expected: testResults.detail.expected,
       matcher: testResults.detail.matcher,
@@ -287,6 +290,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
         } catch (err) {
           this.logger.error(err?.stack);
           results.failed.push({
+            status: SubmissionStatusEnum.FAILED,
             actual: '',
             expected: '',
             input: testCase.input,
@@ -328,6 +332,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
       });
     } catch (err) {
       results.failed.push({
+        status: SubmissionStatusEnum.FAILED,
         actual: '',
         expected: '',
         input: [],
@@ -373,6 +378,7 @@ export class IVMCodeExecutor implements CodeExecutorService {
           this.logger.error(err?.message);
           passed = false;
           results.failed.push({
+            status: SubmissionStatusEnum.FAILED,
             actual: '',
             expected: '',
             input: testCase.input,
