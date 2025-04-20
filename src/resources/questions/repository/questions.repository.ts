@@ -29,6 +29,15 @@ export class QuestionDocumentRepository implements QuestionRepository {
     QuestionSchemaClass.testCaseJoinField,
   ];
 
+  private questionPopulateQuery = [
+    {
+      path: QuestionSchemaClass.categoryJoinField,
+    },
+    {
+      path: QuestionSchemaClass.testCaseJoinField,
+    },
+  ];
+
   async create(data: CreateQuestionDto): Promise<Question> {
     const { testCases, ...rest } = data;
 
@@ -62,7 +71,7 @@ export class QuestionDocumentRepository implements QuestionRepository {
   async findById(id: string): Promise<Question> {
     const question = await this.questionModel
       .findById(id)
-      .populate(this.questionPopulateOption);
+      .populate(this.questionPopulateQuery);
 
     return QuestionMapper.toDomain(question, true);
   }
@@ -74,11 +83,13 @@ export class QuestionDocumentRepository implements QuestionRepository {
       .find(filter, {
         id: true,
         title: true,
+        categoryId: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
       })
-      .populate(this.questionPopulateOption);
+      .populate({ path: QuestionSchemaClass.categoryJoinField });
+
     // If there are no questions, return []
     if (questions.length === 0) return [];
     // Map all of thr question with Mapper
