@@ -55,7 +55,7 @@ export class CategoriesService
       data.name,
     );
 
-    if (isTheNameExist)
+    if (isTheNameExist && isTheNameExist.isChallenge === data.isChallenge)
       throw ErrorApiResponse.conflictRequest(
         `The category name ${data.name} is already existed in this server. Please try again with the new name.`,
       );
