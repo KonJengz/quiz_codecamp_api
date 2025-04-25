@@ -15,7 +15,7 @@ function generateFunctionSeedingTestCase(
   }));
 }
 
-type SeedingQuestions = (Omit<CreateQuestionDto, 'categoryId'> & {
+export type SeedingQuestions = (Omit<CreateQuestionDto, 'categoryId'> & {
   isFunction: boolean;
   variableName: string;
 })[];

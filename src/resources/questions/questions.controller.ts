@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -43,6 +44,7 @@ import {
   DomainStatusEnums,
 } from 'src/common/types/products-shared.type';
 import { QueryEnum } from 'src/utils/decorators/param/QueryEnum.decorator';
+import { CategoriesQueriesOption } from '../categories/dto/get.dto';
 
 @Controller({ version: '1', path: questionsPath.base })
 export class QuestionsController {
@@ -65,6 +67,13 @@ export class QuestionsController {
   }
 
   @ApiQuery({
+    name: questionsPath.queries.isChallenge,
+    required: false,
+    type: Boolean,
+    description:
+      'Query to filter type of categories as a challenge and non-challenge. Provide true if desired response is challenge-categories. Otherwise for non-challenge.',
+  })
+  @ApiQuery({
     name: DomainQueryEnums.status,
     enum: DomainStatusEnums,
     required: false,
@@ -73,10 +82,15 @@ export class QuestionsController {
   @ApiOkResponse({ type: GetManyQuestionsResponse })
   @Get()
   async getMany(
+    @Query(questionsPath.queries.isChallenge)
+    isChallenge: CategoriesQueriesOption['isChallenge'],
     @QueryEnum({ entity: DomainStatusEnums, queryStr: DomainQueryEnums.status })
     status: DomainStatusEnums,
   ): Promise<GetManyQuestionsResponse> {
-    const questions = await this.questionsService.getMany({ status });
+    const questions = await this.questionsService.getMany({
+      status,
+      isChallenge,
+    });
 
     return GetManyQuestionsResponse.getSuccess(questionsPath.base, questions);
   }

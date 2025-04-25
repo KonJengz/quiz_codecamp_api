@@ -15,6 +15,7 @@ import { ObjectHelper } from 'src/utils/object.helper';
 import { ITestCase } from 'src/infrastructure/executor/codeExecutor.service';
 import { NullAble } from 'src/common/types/types';
 import { DomainQueryTypes } from 'src/common/types/products-shared.type';
+import { CategoriesQueriesOption } from '../categories/dto/get.dto';
 
 @Injectable()
 export class QuestionsService implements Service<Question> {
@@ -79,7 +80,7 @@ export class QuestionsService implements Service<Question> {
     return this.questionRepository.findByIdAndUserSubmission(id, userId);
   }
 
-  getMany(options: DomainQueryTypes = {}): Promise<Question[]> {
+  getMany(options: CategoriesQueriesOption = {}): Promise<Question[]> {
     return this.questionRepository.findMany(options);
   }
   async update(data: UpdateQuestionDto, id: string): Promise<Question> {

@@ -5,13 +5,14 @@ import { CreateQuestionDto } from '../dto/create-question.dto';
 import { Category } from 'src/resources/categories/domain/categories.domain';
 import { User } from 'src/resources/users/domain/user.domain';
 import { DomainQueryTypes } from 'src/common/types/products-shared.type';
+import { CategoriesQueriesOption } from 'src/resources/categories/dto/get.dto';
 
 export abstract class QuestionRepository {
   abstract create(data: CreateQuestionDto): Promise<Question>;
 
   abstract findById(id: Question['id']): Promise<NullAble<Question>>;
 
-  abstract findMany(options: DomainQueryTypes): Promise<Array<Question>>;
+  abstract findMany(options: CategoriesQueriesOption): Promise<Array<Question>>;
 
   abstract update<U extends Partial<Omit<Question, 'id'>>>(
     data: U,

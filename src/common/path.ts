@@ -43,6 +43,9 @@ export const questionsPath = {
   idAndMe: `:${QUESTIONS_PATH.paramId}/${SUBMISSIONS_PATH}/${ME}`,
   getById: `:${QUESTIONS_PATH.paramId}`,
   paramId: QUESTIONS_PATH.paramId,
+  queries: {
+    isChallenge: 'cha',
+  },
   category: `${categoriesPath.base}/:${categoriesPath.paramId}`,
   categoryParam: `${categoriesPath.paramId}`,
   updateStatus: `:${QUESTIONS_PATH.paramId}/status`,

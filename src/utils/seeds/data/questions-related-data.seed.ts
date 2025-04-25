@@ -6,10 +6,11 @@ import {
   conditionalQuestions,
   loopQuestions,
   numberQuestions,
+  SeedingQuestions,
   stringQuestions,
 } from './questions.data';
 import { QuestionSchemaClass } from 'src/resources/questions/repository/entities/questions.entity';
-import { Question } from 'src/resources/questions/domain/question.domain';
+import { TestCaseMatcherEnum } from 'src/infrastructure/executor/codeExecutor.service';
 
 const seedsCategoryData: CreateCategoryDto = {
   name: 'Seed',
@@ -34,6 +35,36 @@ const categoriesData: CreateCategoryDto[] = [
     isChallenge: false,
   },
 ];
+
+function geranteSeedQuestion(
+  categoryId: CategorySchemaClass['id'],
+  categoryName: CategorySchemaClass['name'],
+): SeedingQuestions {
+  const seeds: SeedingQuestions = [];
+  const totalSeedQuestions = 5;
+
+  for (let i = 1; i <= totalSeedQuestions; i++) {
+    const question: SeedingQuestions[number] = {
+      title: `${categoryName}_challenge_seed_${i}`,
+      description: `This is seeding challenge question NO.${i} for category : ${categoryName}`,
+      isFunction: true,
+      solution: 'function seed${i}() {}',
+      starterCode: `function seed${i}() {}`,
+      testCases: [
+        {
+          input: [],
+          expected: true,
+          matcher: TestCaseMatcherEnum.toBe,
+        },
+      ],
+      variableName: `seed${i}`,
+    };
+
+    seeds.push(question);
+  }
+
+  return seeds;
+}
 
 export function seedsCategory() {
   const categories: CreateCategoryDto[] = categoriesData;
@@ -61,7 +92,7 @@ export function seedsQuestion(
 ): CreateQuestionDto[] {
   const questions: CreateQuestionDto[] = [];
 
-  const pushingSeedData = (questionsSeed: any[], categoryId) => {
+  const pushingSeedData = (questionsSeed: any[], categoryId: string) => {
     questions.push(
       ...questionsSeed.map((question) => ({ ...question, categoryId })),
     );
@@ -81,6 +112,13 @@ export function seedsQuestion(
       case 'Conditional':
         pushingSeedData(conditionalQuestions, category.id);
         break;
+    }
+
+    if (category.name.includes(`${seedsCategoryData.name}_challenge`)) {
+      pushingSeedData(
+        geranteSeedQuestion(category.id, category.name),
+        category.id,
+      );
     }
   });
 

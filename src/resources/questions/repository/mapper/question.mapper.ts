@@ -8,9 +8,10 @@ import { QuestionSchemaClass } from '../entities/questions.entity';
 import { TestCaseMapper } from 'src/resources/test-cases/repository/mapper/test-case.mapper';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
 import { SubmissionMapper } from 'src/resources/submissions/repository/mapper/submission.mapper';
+import mongoose, { mongo } from 'mongoose';
 
 type QuestionDocument = QuestionSchemaClass & {
-  category?: CategorySchemaClass[];
+  category?: CategorySchemaClass[] | CategorySchemaClass;
   submissions?: SubmissionSchemaClass[];
 };
 
@@ -20,14 +21,41 @@ export class QuestionMapper {
     allFields: boolean = false,
   ): Question {
     if (!documentEntity) return null;
-    const {
-      id,
-      category: categoryDoc,
-      testCases: testCasesDoc,
-      ...rest
-    } = documentEntity.toObject();
+    let id;
+    let rest;
+
+    let categoryDoc;
+    let testCasesDoc;
 
     let category: CategoryForQuestion;
+
+    if (documentEntity.toObject) {
+      const {
+        idDoc,
+        category: category,
+        testCases: testCases,
+        ...restDoc
+      } = documentEntity.toObject();
+
+      rest = restDoc;
+      id = idDoc;
+      categoryDoc = category;
+      testCasesDoc = testCases;
+    } else {
+      const {
+        _id,
+        testCases,
+        category: categoryDoc,
+        ...restDoc
+      } = documentEntity;
+      rest = restDoc;
+      id = _id.toString();
+
+      const { _id: categoryId, ...restCatego } =
+        categoryDoc as CategorySchemaClass & { _id: mongoose.Types.ObjectId };
+
+      category = { ...restCatego, id: _id.toString() };
+    }
 
     const questionDomain = new Question({
       ...rest,
@@ -59,4 +87,6 @@ export class QuestionMapper {
       submission: submissionDomain,
     });
   }
+
+  public static findManyQueryToDomain(questions: QuestionDocument) {}
 }
