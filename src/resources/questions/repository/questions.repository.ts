@@ -11,8 +11,13 @@ import { Category } from 'src/resources/categories/domain/categories.domain';
 import { CategorySchemaClass } from 'src/resources/categories/repository/entities/category.entity';
 import { User } from 'src/resources/users/domain/user.domain';
 import { SubmissionSchemaClass } from 'src/resources/submissions/repository/entities/submissions.entity';
-import { DomainQueryTypes } from 'src/common/types/products-shared.type';
+import {
+  DomainQueryTypes,
+  DomainStatusEnums,
+} from 'src/common/types/products-shared.type';
 import { MongoRepositoryHelper } from 'src/infrastructure/persistence/config/mongodb/mongo.repository';
+import { CategoriesQueriesOption } from 'src/resources/categories/dto/get.dto';
+import { ObjectHelper } from 'src/utils/object.helper';
 
 @Injectable()
 export class QuestionDocumentRepository implements QuestionRepository {
@@ -41,31 +46,17 @@ export class QuestionDocumentRepository implements QuestionRepository {
   async create(data: CreateQuestionDto): Promise<Question> {
     const { testCases, ...rest } = data;
 
-    // starting transaction
-    // const session = await this.mongoConnection.startSession();
-    // session.startTransaction();
-    // try {
     const createdQuestion = new this.questionModel({
       ...rest,
       testCases,
     });
     await createdQuestion.save();
-    // // Update the category to have newly created question
+
     await this.categoryModel.findByIdAndUpdate(createdQuestion.categoryId, {
       $push: { questions: createdQuestion._id },
     });
-    // Commit transaction
-    // session.commitTransaction();
-    // Return the created question
+
     return QuestionMapper.toDomain(createdQuestion);
-    // } catch (err) {
-    //   this.logger.error(`There is an error while creating question: \n`);
-    //   this.logger.error(err?.message);
-    //   // Abort transaction as transction does not succeed.
-    //   await session.abortTransaction();
-    // } finally {
-    //   session.endSession();
-    // }
   }
 
   async findById(id: string): Promise<Question> {
@@ -76,19 +67,54 @@ export class QuestionDocumentRepository implements QuestionRepository {
     return QuestionMapper.toDomain(question, true);
   }
 
-  async findMany(options: DomainQueryTypes): Promise<Question[]> {
-    const filter = MongoRepositoryHelper.statusFilter(options.status);
+  async findMany(options: CategoriesQueriesOption): Promise<Question[]> {
+    const { isChallengeOption, statusOption } = this.filterOptions(options);
 
-    const questions = await this.questionModel
-      .find(filter, {
-        id: true,
-        title: true,
-        categoryId: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      })
-      .populate({ path: QuestionSchemaClass.categoryJoinField });
+    const questions = await this.categoryModel.aggregate([
+      {
+        $match: {
+          $expr: isChallengeOption,
+        },
+      },
+      {
+        $lookup: {
+          from: QuestionSchemaClass.actualCollectionName,
+          // localField: '_id',
+          // foreignField: 'categoryId',
+          let: { categoryId: '$_id' },
+          pipeline: [
+            {
+              $match: statusOption,
+            },
+          ],
+          as: 'questions',
+        },
+      },
+      {
+        $unwind: '$questions',
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              '$questions',
+              {
+                category: {
+                  _id: '$_id',
+                  name: '$name',
+                  isChallenge: '$isChallenge',
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $sort: {
+          createdAt: 1,
+        },
+      },
+    ]);
 
     // If there are no questions, return []
     if (questions.length === 0) return [];
@@ -144,7 +170,6 @@ export class QuestionDocumentRepository implements QuestionRepository {
     data: U,
     id: string,
   ): Promise<Question> {
-    console.log(data);
     const updatedQuestion = await this.questionModel.findByIdAndUpdate(
       id,
       data,
@@ -152,5 +177,37 @@ export class QuestionDocumentRepository implements QuestionRepository {
     );
 
     return QuestionMapper.toDomain(updatedQuestion);
+  }
+
+  // PRIVATE METHOD
+
+  private filterOptions(options: CategoriesQueriesOption): {
+    isChallengeOption: Record<string, unknown>;
+    statusOption: Record<string, unknown>;
+  } {
+    const { isChallenge, status } = options;
+    const statusOption: Record<string, any> = {
+      $expr: { $eq: ['$categoryId', '$$categoryId'] },
+    };
+
+    if (status === DomainStatusEnums.ACTIVE) {
+      statusOption.deletedAt = null;
+    } else if (status === DomainStatusEnums.INACTIVE) {
+      statusOption.deletedAt = { $ne: null };
+    }
+
+    const isChallengeOption: Record<string, any> = {};
+    if (isChallenge) {
+      isChallengeOption['$expr'] = {};
+      switch (isChallenge) {
+        case 'true':
+          isChallengeOption['$expr']['$eq'] = ['$isChallenge', true];
+          break;
+        case 'false':
+          isChallengeOption['$expr']['$eq'] = ['$isChallenge', false];
+          break;
+      }
+    }
+    return { isChallengeOption, statusOption };
   }
 }
